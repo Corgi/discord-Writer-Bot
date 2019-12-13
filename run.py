@@ -8,6 +8,8 @@ import lib
 from bot import WriterBot
 from discord.ext import commands
 
+
+
 # Load the settings for intial setup
 config = lib.get('./settings.json')
 

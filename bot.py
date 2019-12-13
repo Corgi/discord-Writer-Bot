@@ -1,5 +1,4 @@
-import os
-import logging
+import os, logging, datetime, time, lib
 from discord.ext.commands import AutoShardedBot
 
 class WriterBot(AutoShardedBot):
@@ -8,6 +7,8 @@ class WriterBot(AutoShardedBot):
 
     def __init__(self, *args, prefix=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.config = lib.get('./settings.json')
+        self.setup()
 
     async def on_ready(self):
         print('Logged on as', self.user)
@@ -35,3 +36,6 @@ class WriterBot(AutoShardedBot):
                     except Exception as e:
                         print(f'[EXT][{dir}.{cog}] failed to load')
                         print(e)
+
+    def setup(self):
+        self.start_time = time.time()

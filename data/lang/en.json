@@ -55,13 +55,18 @@
 
     "feedback:info": "The `feedback` command has been removed due to spam. If you need any help with Writer-Bot please join the Support Server: https://discord.gg/awaC6Vq",
 
-    "info:bot": "Writer Bot Statistics",
+    "info:bot": "About Writer Bot",
     "info:version": "Version",
     "info:uptime": "Uptime",
     "info:generalstats": "General Stats",
     "info:servers": "Servers",
     "info:members": "Members",
     "info:sprints": "Active Sprints",
+    "info:dev": "Dev Info",
+    "info:dev:branch": "Branch",
+    "info:dev:change": "Latest change",
+    "info:dev:repo": "Code repo",
+    "info:dev:patch": "Patch notes",
 
     "reset:pb": "words-per-minute PB reset to 0",
     "reset:wc": "total word count reset to 0",

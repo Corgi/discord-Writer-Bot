@@ -8,7 +8,7 @@ import lib
 from bot import WriterBot
 from discord.ext import commands
 
-# Load the settings
+# Load the settings for intial setup
 config = lib.get('./settings.json')
 
 # Load the Bot object
@@ -19,6 +19,3 @@ bot.load_commands()
 
 # Start the bot
 bot.run(config.token)
-
-# Testing stuff
-# print(lib.get_string('test', 1))

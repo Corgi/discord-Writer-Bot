@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-
-from pprint import pprint
-
-import json
-import discord
-import lib
+import discord, json, lib
 from bot import WriterBot
 from discord.ext import commands
+from pprint import pprint
 
-
-
-# Load the settings for intial setup
+# Load the settings for initial setup
 config = lib.get('./settings.json')
 
 # Load the Bot object

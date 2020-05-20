@@ -40,3 +40,19 @@ def get_string(str, guild_id):
     path = f'./data/lang/{lang}.json'
     strings = get(path, False)
     return strings[str] if str in strings else f'[[{str}]]'
+
+def find_in_array(lst, key, value):
+    """
+    Find a list element in an array.
+    For example: `list = [{'id': 1, 'name': 'Test'}, {'id': 2, 'name': 'Test 2'}]`
+    `find_in_array(list, 'name', 'Test')`
+    Should return: `{'id': 1, 'name': 'Test'}`
+    :param lst:
+    :param key:
+    :param value:
+    :return:
+    """
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return lst[i]
+    return False

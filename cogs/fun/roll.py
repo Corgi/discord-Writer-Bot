@@ -43,7 +43,6 @@ class Roll(commands.Cog):
 
         total = 0
         output = ''
-        output += ':game_die: '
 
         # Roll the dice {rolls} amount of times
         for x in range(rolls):

@@ -1,0 +1,1 @@
+When setting up docker, a `pip install pymysql` is required for the db connection

@@ -1,13 +1,13 @@
 {
 
-    "err:nouser": "Could not find that user",
-    "err:validamount": "Please enter a valid amount",
-    "err:unknown": "Something went wrong",
-    "err:cmdoptions": "Invalid command options",
-    "err:invalidsetting": "Invalid setting",
-    "err:replytime": "You did not reply within %s seconds, so this command has been cancelled.",
-    "err:what?": "I'm not sure what you mean...",
-    "err:permissions": "You do not have the permissions to do that on this server.",
+    "err:nouser": "Error: Could not find that user",
+    "err:validamount": "Error: Please enter a valid amount",
+    "err:unknown": "Error: Something went wrong",
+    "err:cmdoptions": "Error: Invalid command options",
+    "err:invalidsetting": "Error: Invalid setting",
+    "err:replytime": "Error: You did not reply within %s seconds, so this command has been cancelled.",
+    "err:what?": "Error: I'm not sure what you mean...",
+    "err:permissions": "Error: You do not have the permissions to do that on this server.",
 
     "flip:heads": "It landed on heads!!",
     "flip:tails": "It landed on tails!!",
@@ -62,6 +62,7 @@
     "info:servers": "Servers",
     "info:members": "Members",
     "info:sprints": "Active Sprints",
+    "info:helpserver": "Help Server",
     "info:dev": "Dev Info",
     "info:dev:branch": "Branch",
     "info:dev:change": "Latest change",
@@ -171,6 +172,7 @@
     "stats:challenges": "Challenges Completed: ",
     "stats:projects": "Projects On-the-Go: ",
     "stats:projectscompleted": "Projects Completed: ",
+
 
     "a": "a",
     "user": "User",

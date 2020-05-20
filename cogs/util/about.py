@@ -21,7 +21,6 @@ class About(commands.Cog):
         guild_id = context.guild.id
         config = self.bot.config
 
-
         # Begin the embedded message
         embed = discord.Embed(title=lib.get_string('info:bot', guild_id), color=3447003)
         embed.add_field(name=lib.get_string('info:version', guild_id), value=config.version, inline=True)
@@ -32,6 +31,7 @@ class About(commands.Cog):
         stats.append('• ' + lib.get_string('info:servers', guild_id) + ': ' + format(len(self.bot.guilds)))
         stats.append('• ' + lib.get_string('info:members', guild_id) + ': ' + format(self.count_members(self.bot.guilds)))
         stats.append('• ' + lib.get_string('info:sprints', guild_id) + ': TODO')
+        stats.append('• ' + lib.get_string('info:helpserver', guild_id) + ': https://discord.gg/FbmaegR')
         stats = '\n'.join(stats)
 
         embed.add_field(name=lib.get_string('info:generalstats', guild_id), value=stats, inline=False)

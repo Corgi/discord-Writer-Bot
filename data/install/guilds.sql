@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS guilds (
+    id INTEGER PRIMARY KEY,
+    guild TEXT NOT NULL
+);

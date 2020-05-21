@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS events (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY auto_increment,
     guild TEXT NOT NULL,
     channel TEXT NOT NULL,
     title VARCHAR(255) NOT NULL,

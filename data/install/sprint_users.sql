@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS sprint_users (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY auto_increment,
     sprint INTEGER NOT NULL,
     user TEXT NOT NULL,
     timejoined BIGINT DEFAULT 0,

@@ -1,5 +1,7 @@
 import discord
+import lib
 from discord.ext import commands
+from structures.guild import Guild
 from structures.user import User
 
 class XP(commands.Cog):
@@ -19,12 +21,26 @@ class XP(commands.Cog):
         guild_id = context.guild.id
         user_id = context.message.author.id
 
-        if who == 'all':
-            pass
+        if who == 'top':
+
+            guild = Guild(context.guild)
+            users = guild.get_top_xp()
+            output = ':trophy: **' + lib.get_string('xp:leaderboard', guild_id) + '** :trophy: \n\n'
+            for key in range(len(users)):
+                user = users[key]
+                output += str(key + 1) + '. ' + user.get_name() + ' - ' + user.get_xp_bar() + '\n'
+
         else:
             user = User(user_id, guild_id)
             xp = user.get_xp()
 
+            # Either display a message saying they have no XP, or display the XP bar for the user
+            if xp is None:
+                output = context.message.author.mention + ', ' + lib.get_string('xp:noxp', guild_id)
+            else:
+                output = context.message.author.mention + ', ' + lib.get_string('youare', guild_id) + ' ' + user.get_xp_bar()
+
+        await context.send(output)
 
 def setup(bot):
     bot.add_cog(XP(bot))

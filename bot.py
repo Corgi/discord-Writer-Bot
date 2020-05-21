@@ -1,5 +1,6 @@
 import os, logging, datetime, time, lib
 from discord.ext.commands import AutoShardedBot
+from structures.db import *
 
 class WriterBot(AutoShardedBot):
 
@@ -38,4 +39,8 @@ class WriterBot(AutoShardedBot):
                         print(e)
 
     def setup(self):
-        self.start_time = time.time()
+
+        db = Database.instance()
+        db.install()
+        print('[DB] Database tables installed')
+

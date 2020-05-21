@@ -13,7 +13,7 @@ class Database:
 
         # Load the connection configuration
         config = lib.get(self.__path + '/../settings.json')
-        self.connection = pymysql.connect(config.db_host, config.db_user, config.db_pass, config.db_name)
+        self.connection = pymysql.connect(host=config.db_host, user=config.db_user, passwd=config.db_pass, db=config.db_name, autocommit=True)
 
         # Set the cursor to be used, with DictCursor so we can refer to results by their keys
         self.cursor = self.connection.cursor(pymysql.cursors.DictCursor)
@@ -46,11 +46,11 @@ class Database:
             self.connection.commit()
             return True
 
-    def get(self, table, where=None, fields='*'):
+    def __build_get(self, table, where=None, fields=['*']):
 
         params = []
 
-        sql = 'SELECT ' + fields + ' ' \
+        sql = 'SELECT ' + ', '.join(fields) + ' ' \
               'FROM ' + table + ' '
 
         if where is not None:
@@ -64,7 +64,12 @@ class Database:
             # Remove the last 'AND '
             sql = sql[:-4]
 
-        print(sql)
         self.cursor.execute(sql, params)
-        return self.cursor.fetchall()
 
+    def get(self, table, where=None, fields=['*']):
+        self.__build_get(table, where, fields)
+        return self.cursor.fetchone()
+
+    def getall(self, table, where=None, fields=['*']):
+        self.__build_get(table, where, fields)
+        return self.cursor.fetchall()

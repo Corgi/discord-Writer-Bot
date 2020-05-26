@@ -18,7 +18,7 @@ class Quote(commands.Cog):
         guild_id = context.guild.id
 
         # Load the JSON file with the quotes
-        quotes = lib.get('./assets/json/'+lib.get_lang(guild_id)+'/quotes.json')
+        quotes = lib.get_asset('quotes', guild_id)
 
         max = len(quotes) - 1
         quote = quotes[random.randint(1, max)]

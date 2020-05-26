@@ -12,6 +12,7 @@
     "flip:heads": "It landed on heads!!",
     "flip:tails": "It landed on tails!!",
 
+    "8ball:arguments": "What is your question?",
     "8ball:0": ":blue_circle: It is certain",
     "8ball:1": ":blue_circle: It is decidedly so",
     "8ball:2": ":blue_circle: Without a doubt",
@@ -83,6 +84,7 @@
     "mysetting:timezone:help": "Your timezone setting must be a valid TZ Database Name. Please see the following wikipedia page and choose your timezone from the TZ Database Name column: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones (It should look something like `Europe/London`)",
 
     "ask:error": "I'd love to ask you a question about that, but I don't know what it is.",
+    "ask:arguments": "Do you want a character-building question `c` or a world-building question `w`?",
 
     "challenge:alreadyactive": "You already have an active challenge. You will need to either complete or cancel it first.",
     "challenge:completed": "You have completed the challenge",

@@ -32,13 +32,13 @@ class Reassure(commands.Cog):
             return
 
         # Load the JSON file with the quotes
-        quotes = lib.get('./assets/json/'+lib.get_lang(guild_id)+'/reassure.json')
+        quotes = lib.get_asset('reassure', guild_id)
 
         max = len(quotes) - 1
         quote = quotes[random.randint(1, max)]
 
         # Send the message
-        await context.send( user.mention + '\n' + format(quote) )
+        await context.send( user.mention + ', ' + format(quote) )
 
 def setup(bot):
     bot.add_cog(Reassure(bot))

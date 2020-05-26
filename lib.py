@@ -1,9 +1,8 @@
-from pprint import pprint
-
-
 import os
 import json
 from collections import namedtuple
+from pprint import pprint
+from os import path
 
 def get(file,as_object=True):
     """
@@ -40,6 +39,23 @@ def get_string(str, guild_id):
     path = f'./data/lang/{lang}.json'
     strings = get(path, False)
     return strings[str] if str in strings else f'[[{str}]]'
+
+def get_asset(asset, guild_id):
+    """
+    Load a JSON asset file, in the language of the guild_id
+    :param asset:
+    :param guild_id:
+    :return:
+    """
+
+    file = './assets/json/' + get_lang(guild_id) + '/' + asset + '.json'
+
+    # Try and get the file in the server's language first. If not, default to 'en'
+    if path.exists(file):
+        return get(file)
+    else:
+        return get('./assets/json/en/' + asset + '.json')
+
 
 def find_in_array(lst, key, value):
     """

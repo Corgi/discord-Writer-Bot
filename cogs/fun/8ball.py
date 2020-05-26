@@ -2,14 +2,22 @@ import random
 import lib
 import discord
 from discord.ext import commands
+from structures.wrapper import CommandWrapper
 
-class EightBall(commands.Cog):
+class EightBall(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
+        self._arguments = [
+            {
+                'key': 'question',
+                'prompt': '8ball:arguments',
+                'required': True
+            }
+        ]
 
     @commands.command(name="8ball")
-    async def _8ball(self, context, question):
+    async def _8ball(self, context, question=None):
         """
         Ask the magic 8-ball a question. Your question will be routed to a text-processing AI in order to properly analyze the content of the question and provide a meaningful answer.
 
@@ -17,6 +25,14 @@ class EightBall(commands.Cog):
         """
 
         guild_id = context.guild.id
+
+        # Check the arguments were all supplied and get a dict list of them and their values, after any prompts
+        args = await self.check_arguments(context, question=question)
+        if not args:
+            return
+
+        # Overwrite variable from check_arguments()
+        question = args['question']
 
         # Create array of possible answers to choose from
         answers = []
@@ -29,7 +45,8 @@ class EightBall(commands.Cog):
         answer = random.choice(answers)
 
         # Send the message
-        await context.send( context.message.author.mention + '\n' + format(answer) )
+        await context.send( context.message.author.mention + ', ' + format(answer) )
+
 
 def setup(bot):
     bot.add_cog(EightBall(bot))

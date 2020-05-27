@@ -31,22 +31,40 @@ class CommandWrapper:
 
         return kwargs
 
-    async def prompt(self, context, message):
+    async def prompt(self, context, message, raw_message=False, timeout=None, extra_check=None):
+
+        # Use default timeout is none specified
+        if timeout is None:
+            timeout = self.TIMEOUT_WAIT
 
         # Check if the response is from the same user, in the same channel.
-        def check(msg):
-            return msg.author == context.author and msg.channel == context.channel
+        def check_message(msg):
+            return msg.author == context.author and msg.channel == context.channel and not msg.content.startswith(context.prefix)
+
+        # Store the name of the function to call in the variable 'call_check'
+        call_check = check_message
+
+        # If we specified an extra check, we want to check that as well.
+        if callable(extra_check):
+
+            # If the extra_check is a lambda, then define a new function to use in the response check
+            def check_message_extra(msg):
+                return check_message(msg) and extra_check(msg.content)
+
+            # And then assign it to the 'call_check' variable
+            call_check = check_message_extra
 
         # Send the prompt message and wait for a reply
-        message = lib.get_string(message, context.guild.id)
+        if not raw_message:
+            message = lib.get_string(message, context.guild.id)
+
         req = await context.send(f'{context.author.mention}, {message}')
         try:
-            response = await self.bot.wait_for('message', check=check, timeout=self.TIMEOUT_WAIT)
+            response = await self.bot.wait_for('message', check=call_check, timeout=timeout)
             return response
         except asyncio.TimeoutError:
-            await req.edit(content='Request for command argument timed out')
+            await req.edit(content='Request for response timed out')
             return False
-
 
 # @commands.command()
 # async def foo(ctx, bar=None):

@@ -6,7 +6,7 @@ class WriterBot(AutoShardedBot):
 
     COMMAND_GROUPS = ['util', 'fun', 'writing']
 
-    def __init__(self, *args, prefix=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.config = lib.get('./settings.json')
         self.setup()

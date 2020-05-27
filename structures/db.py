@@ -66,10 +66,76 @@ class Database:
 
         self.cursor.execute(sql, params)
 
+    def __build_insert(self, table, params):
+
+        # Create param placeholders to be used in the query
+        placeholders = ['%s'] * len(params.values())
+
+        sql = 'INSERT INTO ' + table + ' '
+        sql += '(' + ','.join(params.keys()) + ') '
+        sql += 'VALUES '
+        sql += '(' + ','.join(placeholders) + ') '
+
+        sql_params = list(params.values())
+        self.cursor.execute(sql, sql_params)
+
+    def __build_delete(self, table, params):
+
+        sql_params = []
+        sql = 'DELETE FROM ' + table + ' WHERE '
+
+        for field, value in params.items():
+            sql += field + ' = %s AND '
+            sql_params.append(value)
+
+        # Remove the last 'AND '
+        sql = sql[:-4]
+
+        # Execute the query
+        self.cursor.execute(sql, sql_params)
+
+    def __build_update(self, table, params, where):
+
+        sql_params = []
+        sql = 'UPDATE ' + table + ' SET '
+
+        # Set values
+        for field, value in params.items():
+            sql += field + ' = %s, '
+            sql_params.append(value)
+
+        # Remove the last ', '
+        sql = sql[:-2]
+
+        # Where clauses
+        sql += ' WHERE '
+
+        for field, value in where.items():
+            sql += field + ' = %s AND '
+            sql_params.append(value)
+
+        # Remove the last 'AND '
+        sql = sql[:-4]
+
+        # Execute the query
+        self.cursor.execute(sql, sql_params)
+
     def get(self, table, where=None, fields=['*']):
         self.__build_get(table, where, fields)
         return self.cursor.fetchone()
 
-    def getall(self, table, where=None, fields=['*']):
+    def get_all(self, table, where=None, fields=['*']):
         self.__build_get(table, where, fields)
         return self.cursor.fetchall()
+
+    def insert(self, table, params):
+        self.__build_insert(table, params)
+        return self.cursor.rowcount
+
+    def delete(self, table, params):
+        self.__build_delete(table, params)
+        return self.cursor.rowcount
+
+    def update(self, table, params, where):
+        self.__build_update(table, params, where)
+        return self.cursor.rowcount

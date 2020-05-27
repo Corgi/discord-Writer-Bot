@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS sprint_users (
     starting_wc INTEGER DEFAULT 0,
     current_wc INTEGER DEFAULT 0,
     ending_wc INTEGER DEFAULT 0,
-    project INTEGER NULL
+    project INTEGER NULL,
+    event INTEGER NULL
 );

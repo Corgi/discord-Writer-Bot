@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS user_challenges (
     guild TEXT NOT NULL,
     user TEXT NOT NULL,
     challenge TEXT NOT NULL,
-    completed BIGINT DEFAULT 0
+    completed BIGINT DEFAULT 0,
+    xp INTEGER NOT NULL
 );

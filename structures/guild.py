@@ -21,7 +21,7 @@ class Guild:
         """
 
         # The users might no longer be in the guild, so we will get more than 10 and just stop once we get 10 which are still active
-        results = self.__db.getall('user_xp', {'guild': self._guild.id})
+        results = self.__db.get_all('user_xp', {'guild': self._guild.id})
         results = sorted(results, key=itemgetter('xp'), reverse=True)
 
         # Build an array of User objects

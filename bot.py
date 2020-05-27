@@ -9,6 +9,7 @@ class WriterBot(AutoShardedBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.config = lib.get('./settings.json')
+        self.start_time = time.time()
         self.setup()
 
     async def on_ready(self):

@@ -80,8 +80,10 @@
     "reset:xp": "xp/level reset",
 
     "setting:updated": "updated server setting",
-    "mysetting:updated": "updated your setting",
+    "mysetting:updated": "updated setting `{}` to: `{}`",
     "mysetting:timezone:help": "Your timezone setting must be a valid TZ Database Name. Please see the following wikipedia page and choose your timezone from the TZ Database Name column: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones (It should look something like `Europe/London`)",
+    "mysetting:argument:setting": "What setting do you want to update?",
+    "mysetting:argument:value": "What value do you want to set for this setting?",
 
     "ask:error": "I'd love to ask you a question about that, but I don't know what it is.",
     "ask:arguments": "Do you want a character-building question `c` or a world-building question `w`?",
@@ -154,7 +156,7 @@
     "event:schedule:invaliddate": "Invalid date. Please choose a valid date, in the format dd-mm-yyyy (E.g. 26-07-2019)",
     "event:schedule:invalidtime": "Invalid time. Please choose a valid 24-hour time. E.g. 18:00, 10:15, etc...",
     "event:timezonenotset": "In order to schedule an event, we must first calculate the difference between your timezone and the bot's timezone.\nTo do this, please set your timezone by running `myset timezone <zone>`, e.g. `myset timezone Europe/London`, or `myset timezone America/Los_Angeles`, etc... Then try scheduling your event again.\nIf you are unsure of your timezone, please refer to this wikipedia page (TZ database name column): https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
-    "event:timezoneupdated": "Using the timezone (%s), your local time right now should be: %s (UTC%s)\nIf that is not correct, please run this command again using a timezone which gives you your correct local time.",
+    "event:timezoneupdated": "Using the timezone {}, your local time right now should be: {} (UTC{})\nIf that is not correct, please run this command again using a timezone which gives you your correct local time.",
     "event:preschedule": "Before we get started, let's just check your local time is still correct.\nYour timezone setting is (%s), which would make your local time: %s (UTC%s).\nIf that is not correct, please cancel this command and run the `myset timezone <zone>` command to update it.\n---------------------------------------------------------------------------",
 
     "event:schedule:datebeforetoday": "That date has already passed. Please choose a valid date from today.",

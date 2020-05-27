@@ -1,0 +1,23 @@
+- Commands
+    - util
+        - about (sprint info)
+        - mysetting
+        - patch
+        - reset
+        - setting
+        - stats
+    - writing
+        - event
+        - generate
+        - goal
+        - project
+        - prompt
+        - sprint
+        - wrote
+- Crons
+- Check things like prefix setting
+
+
+
+NOTES:
+For timezone stuff: pip install pytz

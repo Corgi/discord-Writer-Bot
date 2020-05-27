@@ -155,7 +155,7 @@ class Challenge(commands.Cog, CommandWrapper):
         message += lib.get_string('challenge:decide', user.get_guild())
 
         # Print the challenge and ask for confirmation response
-        response = await self.prompt(context, message, True, 30, lambda resp : resp.lower() in ('y', 'yes', 'n', 'no'))
+        response = await self.prompt(context, message, True, lambda resp : resp.lower() in ('y', 'yes', 'n', 'no'))
         if not response:
             return
 

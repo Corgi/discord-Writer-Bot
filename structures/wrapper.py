@@ -31,7 +31,7 @@ class CommandWrapper:
 
         return kwargs
 
-    async def prompt(self, context, message, raw_message=False, timeout=None, extra_check=None):
+    async def prompt(self, context, message, raw_message=False, extra_check=None, timeout=None):
 
         # Use default timeout is none specified
         if timeout is None:

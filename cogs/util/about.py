@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import os, json, lib, discord, datetime, time
 from discord.ext import commands
 

@@ -14,6 +14,7 @@ class User:
         self._name = name
         self._xp = None
         self._stats = None
+        self._settings = None
 
     def get_id(self):
         return self._id
@@ -127,3 +128,39 @@ class User:
         # Otherwise, we want to insert a new one
         else:
             return self.__db.insert('user_stats', {'user': self._id, 'guild': self._guild, 'name': name, 'value': amount})
+
+    def get_setting(self, setting):
+
+        # If the settings property is None, then load it up first
+        if self._settings is None:
+            self.load_settings()
+
+        # Now check if the key exists in the dictionary
+        if setting in self._settings:
+            return self._settings[setting]
+        else:
+            return None
+
+    def load_settings(self):
+
+        # Get the user_settings records
+        records = self.__db.get_all('user_settings', {'user': self._id})
+
+        # Reset the stats property
+        self._settings = {}
+
+        # Loop through the results and add to the stats property
+        for row in records:
+            self._settings[row['setting']] = row['value']
+
+    def update_setting(self, setting, value):
+
+        # If the user already has a value for this setting, we want to update
+        user_setting = self.get_setting(setting)
+
+        if user_setting:
+            return self.__db.update('user_settings', {'value': value}, {'user': self._id, 'setting': setting})
+
+        # Otherwise, we want to insert a new one
+        else:
+            return self.__db.insert('user_settings', {'user': self._id, 'setting': setting, 'value': value})

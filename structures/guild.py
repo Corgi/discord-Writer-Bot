@@ -13,6 +13,11 @@ class Guild:
         # Initialise the database instance
         self.__db = Database.instance()
         self._guild = guild
+        self._id = guild.id
+        self._members = [member.id for member in self._guild.members]
+
+    def get_members_in_sql(self):
+        return ', '.join(str(m) for m in self._members)
 
     def get_top_xp(self):
         """
@@ -20,18 +25,15 @@ class Guild:
         :return: array
         """
 
-        # The users might no longer be in the guild, so we will get more than 10 and just stop once we get 10 which are still active
-        results = self.__db.get_all('user_xp', {'guild': self._guild.id})
-        results = sorted(results, key=itemgetter('xp'), reverse=True)
+        # Build the SQL query using the IDs of the guild members
+        sql = 'SELECT user FROM user_xp WHERE user IN (' + self.get_members_in_sql() + ') ORDER BY xp DESC LIMIT ' + str(self.TOP_LIMIT)
+        self.__db.cursor.execute(sql)
+        results = self.__db.cursor.fetchall()
 
-        # Build an array of User objects
         users = []
         for user in results:
-            # If the user still exists in the guild, and we haven't got 10 yet, add to the return array
             guild_member = self._guild.get_member( int(user['user']) )
-            if guild_member is not None and len(users) < self.TOP_LIMIT:
-                users.append( User(user['user'], user['guild'], guild_member.display_name) )
+            usr = User(user['user'], self._id, None, guild_member.display_name)
+            users.append( usr )
 
         return users
-
-

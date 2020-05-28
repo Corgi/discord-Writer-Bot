@@ -1,5 +1,6 @@
 import discord, lib
 from discord.ext import commands
+from structures.guild import Guild
 from structures.user import User
 from structures.wrapper import CommandWrapper
 
@@ -9,7 +10,7 @@ class Reset(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_resets = ['pb', 'wc', 'xp', 'all', 'server']
+        self._supported_resets = ['pb', 'wc', 'xp', 'all']
         self._arguments = [
             {
                 'key': 'what',
@@ -27,14 +28,13 @@ class Reset(commands.Cog, CommandWrapper):
     @commands.command(name="reset")
     async def reset(self, context, what=None, confirm=None):
         """
-        Lets you reset your server statistics.
+        Lets you reset your statistics/records.
 
         Examples:
-            !reset pb: Resets your wpm personal best on the server
-            !reset wc: Resets your total word count on the server
+            !reset pb: Resets your wpm personal best
+            !reset wc: Resets your total word count
             !reset xp: Resets your xp/level to 0
-            !reset all: Resets all your stats which can be reset on the server
-            !reset server: Resets the entire server stats, records and xp/levels (if you have mod permissions)
+            !reset all: Resets your entire profile
         """
 
         user = User(context.message.author.id, context.guild.id, context)
@@ -72,9 +72,6 @@ class Reset(commands.Cog, CommandWrapper):
         elif what == 'all':
             user.reset()
             output = lib.get_string('reset:done', user.get_guild())
-
-        elif what == 'server':
-            pass
 
         return await context.send( user.get_mention() + ', ' + output )
 

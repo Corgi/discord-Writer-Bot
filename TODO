@@ -1,8 +1,6 @@
 - Commands
     - util
         - about (sprint info)
-        - mysetting
-        - patch
         - reset
         - setting
         - stats
@@ -16,8 +14,8 @@
         - wrote
 - Crons
 - Check things like prefix setting
-
-
+- Script to remove duplicates from user_records and user_stats, etc... and keep highest ones, as removing guild column from all user_* things to make info follow across servers
+    - These will need to be run on the DB before linking it up to the new bot
 
 NOTES:
 For timezone stuff: pip install pytz

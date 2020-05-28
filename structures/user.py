@@ -15,6 +15,7 @@ class User:
         self._xp = None
         self._stats = None
         self._settings = None
+        self._records = None
 
     def get_id(self):
         return self._id
@@ -28,6 +29,18 @@ class User:
     def get_mention(self):
         return f'<@{self._id}>'
 
+    def reset(self):
+        """
+        Reset the entire user's stats, records, xp, etc...
+        :return:
+        """
+        self.__db.delete('user_challenges', {'user': self._id})
+        self.__db.delete('user_goals', {'user': self._id})
+        self.__db.delete('user_records', {'user': self._id})
+        self.__db.delete('user_stats', {'user': self._id})
+        self.__db.delete('user_xp', {'user': self._id})
+
+
     def get_xp(self):
 
         # If xp is None then we have't got the record yet, so try and get it.
@@ -37,7 +50,7 @@ class User:
         return self._xp
 
     def load_xp(self):
-        xp = self.__db.get('user_xp', {'user': self._id, 'guild' : self._guild})
+        xp = self.__db.get('user_xp', {'user': self._id})
         if xp:
             experience = Experience(xp['xp'])
             self._xp = {'id': xp['id'], 'xp': xp['xp'], 'lvl': experience.get_level(), 'next': experience.get_next_level_xp()}
@@ -51,19 +64,26 @@ class User:
         else:
             return ''
 
-    async def add_xp(self, amount):
+    def add_xp(self, amount):
+
+        user_xp = self.get_xp()
+        if user_xp:
+            amount += user_xp['xp']
+
+        return self.update_xp(amount)
+
+    async def update_xp(self, amount):
 
         user_xp = self.get_xp()
 
         # If they already have an XP record, update it
         if user_xp:
             current_level = user_xp['lvl']
-            amount += user_xp['xp']
             result = self.__db.update('user_xp', {'xp': amount}, {'id': user_xp['id']})
         else:
             # Otherwise, insert a new one
             current_level = 1
-            result = self.__db.insert('user_xp', {'user': self._id, 'guild': self._guild, 'xp': amount})
+            result = self.__db.insert('user_xp', {'user': self._id, 'xp': amount})
 
         # Reload the XP onto the user object and into the user_xp variable
         self.load_xp()
@@ -71,22 +91,22 @@ class User:
 
         # If the level now is higher than it was, print the level up message
         if user_xp['lvl'] > current_level:
-            await self.__context.send( lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']) )
+            await self.__context.send(lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']))
 
         return result
 
     def get_challenge(self):
-        return self.__db.get('user_challenges', {'user': self._id, 'guild': self._guild, 'completed': 0})
+        return self.__db.get('user_challenges', {'user': self._id, 'completed': 0})
 
     def set_challenge(self, challenge, xp):
         current_challenge = self.get_challenge()
         if not current_challenge:
-            return self.__db.insert('user_challenges', {'user': self._id, 'guild': self._guild, 'challenge': challenge, 'xp': xp})
+            return self.__db.insert('user_challenges', {'user': self._id, 'challenge': challenge, 'xp': xp})
         else:
             return False
 
     def delete_challenge(self):
-        return self.__db.delete('user_challenges', {'user': self._id, 'guild': self._guild})
+        return self.__db.delete('user_challenges', {'user': self._id})
 
     def complete_challenge(self, id):
         now = int(time.time())
@@ -107,7 +127,7 @@ class User:
     def load_stats(self):
 
         # Get the user_stats records
-        records = self.__db.get_all('user_stats', {'user': self._id, 'guild': self._guild})
+        records = self.__db.get_all('user_stats', {'user': self._id})
 
         # Reset the stats property
         self._stats = {}
@@ -116,18 +136,28 @@ class User:
         for row in records:
             self._stats[row['name']] = row['value']
 
-    def add_stat(self, name, amount):
+    def update_stat(self, name, amount):
 
         # If the user already has a value for this stat, we want to update
         user_stat = self.get_stat(name)
 
         if user_stat:
-            amount += int(user_stat)
-            return self.__db.update('user_stats', {'value': amount}, {'user': self._id, 'guild': self._guild, 'name': name})
+            return self.__db.update('user_stats', {'value': amount}, {'user': self._id, 'name': name})
 
         # Otherwise, we want to insert a new one
         else:
-            return self.__db.insert('user_stats', {'user': self._id, 'guild': self._guild, 'name': name, 'value': amount})
+            return self.__db.insert('user_stats', {'user': self._id, 'name': name, 'value': amount})
+
+    def add_stat(self, name, amount):
+
+        # If the user already has a value for this stat, we want to get their current amount so we can increment it
+        user_stat = self.get_stat(name)
+
+        if user_stat:
+            amount += int(user_stat)
+
+        # Now return the update_stat with the new amount (if incremented)
+        return self.update_stat(name, amount)
 
     def get_setting(self, setting):
 
@@ -164,3 +194,39 @@ class User:
         # Otherwise, we want to insert a new one
         else:
             return self.__db.insert('user_settings', {'user': self._id, 'setting': setting, 'value': value})
+
+    def get_record(self, name):
+
+        # If the records property is None, then load it up first
+        if self._records is None:
+            self.load_records()
+
+        # Now check if the key exists in the dictionary
+        if name in self._records:
+            return self._records[name]
+        else:
+            return None
+
+    def load_records(self):
+
+        # Get the user_settings records
+        records = self.__db.get_all('user_records', {'user': self._id})
+
+        # Reset the stats property
+        self._records = {}
+
+        # Loop through the results and add to the stats property
+        for row in records:
+            self._records[row['record']] = row['value']
+
+    def update_record(self, name, value):
+
+        # If the user already has a value for this record, we want to update
+        user_record = self.get_record(name)
+
+        if user_record:
+            return self.__db.update('user_records', {'value': value}, {'user': self._id, 'record': name})
+
+        # Otherwise, we want to insert a new one
+        else:
+            return self.__db.insert('user_records', {'user': self._id, 'record': name, 'value': value})

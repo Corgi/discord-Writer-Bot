@@ -154,8 +154,11 @@ class Challenge(commands.Cog, CommandWrapper):
         message = challenge + '\n'
         message += lib.get_string('challenge:decide', user.get_guild())
 
+        # Build a fake argument, as the argument is optional so isn't checked by the normal check_arguments method
+        argument = {'prompt': message, 'check': lambda resp : resp.lower() in ('y', 'yes', 'n', 'no')}
+
         # Print the challenge and ask for confirmation response
-        response = await self.prompt(context, message, True, lambda resp : resp.lower() in ('y', 'yes', 'n', 'no'))
+        response = await self.prompt(context, argument, True)
         if not response:
             return
 

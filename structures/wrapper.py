@@ -23,7 +23,7 @@ class CommandWrapper:
                 # If the argument is required and the value is invalid, then prompt for a value
                 if arg['required'] and not value:
 
-                    response = await self.prompt(context, arg['prompt'])
+                    response = await self.prompt(context, arg)
                     if response:
                         kwargs[arg['key']] = response.content
                     else:
@@ -31,7 +31,13 @@ class CommandWrapper:
 
         return kwargs
 
-    async def prompt(self, context, message, raw_message=False, extra_check=None, timeout=None):
+    async def prompt(self, context, argument, raw_message=False, timeout=None):
+
+        # Get the message we want to use for the prompt
+        message = argument['prompt']
+
+        # Get any extra check we want to do for this argument, to check the value is in a specific format
+        extra_check = argument['check'] if 'check' in argument else False
 
         # Use default timeout is none specified
         if timeout is None:
@@ -49,7 +55,7 @@ class CommandWrapper:
 
             # If the extra_check is a lambda, then define a new function to use in the response check
             def check_message_extra(msg):
-                return check_message(msg) and extra_check(msg.content)
+                return check_message(msg) and extra_check(msg.content.lower())
 
             # And then assign it to the 'call_check' variable
             call_check = check_message_extra

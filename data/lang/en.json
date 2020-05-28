@@ -80,7 +80,11 @@
     "reset:argument:what": "What do you want to reset? WPM personal best: `pb`, Total word count: `wc`, Experience/Level: `xp`, or your entire profile: `all`?",
     "reset:argument:confirm": "Are you sure you want to do that? (`yes` or `no`)",
 
-    "setting:updated": "updated server setting",
+    "setting:updated": "updated server setting `{}` to `{}`",
+    "setting:argument:setting": "What setting do you want to update?",
+    "setting:argument:value": "What value do you want to set for this setting?",
+    "setting:none": "No settings found",
+
     "mysetting:updated": "updated setting `{}` to: `{}`",
     "mysetting:timezone:help": "Your timezone setting must be a valid TZ Database Name. Please see the following wikipedia page and choose your timezone from the TZ Database Name column: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones (It should look something like `Europe/London`)",
     "mysetting:argument:setting": "What setting do you want to update?",

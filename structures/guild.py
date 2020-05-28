@@ -15,9 +15,57 @@ class Guild:
         self._guild = guild
         self._id = guild.id
         self._members = [member.id for member in self._guild.members]
+        self._settings = None
+
+    def get_id(self):
+        return self._id
 
     def get_members_in_sql(self):
         return ', '.join(str(m) for m in self._members)
+
+    def get_settings(self):
+
+        # If the settings property is None, then load it up first
+        if self._settings is None:
+            self.load_settings()
+
+        return self._settings
+
+    def get_setting(self, setting):
+
+        # If the settings property is None, then load it up first
+        if self._settings is None:
+            self.load_settings()
+
+        # Now check if the key exists in the dictionary
+        if setting in self._settings:
+            return self._settings[setting]
+        else:
+            return None
+
+    def load_settings(self):
+
+        # Get the user_settings records
+        records = self.__db.get_all('guild_settings', {'guild': self._id})
+
+        # Reset the stats property
+        self._settings = {}
+
+        # Loop through the results and add to the stats property
+        for row in records:
+            self._settings[row['setting']] = row['value']
+
+    def update_setting(self, setting, value):
+
+        # If the user already has a value for this setting, we want to update
+        user_setting = self.get_setting(setting)
+
+        if user_setting:
+            return self.__db.update('guild_settings', {'value': value}, {'guild': self._id, 'setting': setting})
+
+        # Otherwise, we want to insert a new one
+        else:
+            return self.__db.insert('guild_settings', {'guild': self._id, 'setting': setting, 'value': value})
 
     def get_top_xp(self):
         """

@@ -36,6 +36,18 @@ class MySetting(commands.Cog, CommandWrapper):
         """
         user = User(context.message.author.id, context.guild.id, context)
 
+        # If we want to list the setting, do that instead.
+        if setting.lower() == 'list':
+            settings = user.get_settings()
+            output = '```ini\n';
+            if settings:
+                for setting, value in settings.items():
+                    output += setting + '=' + str(value) + '\n'
+            else:
+                output += lib.get_string('setting:none', guild.get_id())
+            output += '```'
+            return await context.send(user.get_mention() + ',\n' + output)
+
         # Check the arguments are valid
         args = await self.check_arguments(context, setting=setting, value=value)
         if not args:

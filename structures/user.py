@@ -159,6 +159,14 @@ class User:
         # Now return the update_stat with the new amount (if incremented)
         return self.update_stat(name, amount)
 
+    def get_settings(self):
+
+        # If the settings property is None, then load it up first
+        if self._settings is None:
+            self.load_settings()
+
+        return self._settings
+
     def get_setting(self, setting):
 
         # If the settings property is None, then load it up first

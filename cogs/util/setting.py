@@ -16,7 +16,9 @@ class Setting(commands.Cog, CommandWrapper):
             {
                 'key': 'setting',
                 'prompt': 'setting:argument:setting',
-                'required': True
+                'required': True,
+                'check': lambda content: content in self._supported_settings,
+                'error': 'err:invalidsetting'
             },
             {
                 'key': 'value',
@@ -40,7 +42,7 @@ class Setting(commands.Cog, CommandWrapper):
         guild = Guild(context.guild)
 
         # If we want to list the setting, do that instead.
-        if setting.lower() == 'list':
+        if setting is not None and setting.lower() == 'list':
             settings = guild.get_settings()
             output = '```ini\n';
             if settings:
@@ -51,7 +53,6 @@ class Setting(commands.Cog, CommandWrapper):
             output += '```'
             return await context.send(output)
 
-
         # Otherwise, continue on as we must be trying to set a setting value
         # Check the arguments are valid
         args = await self.check_arguments(context, setting=setting, value=value)
@@ -60,10 +61,6 @@ class Setting(commands.Cog, CommandWrapper):
 
         setting = args['setting'].lower()
         value = args['value']
-
-        # Check if the setting is actually valid
-        if setting not in self._supported_settings:
-            return await context.send(user.get_mention() + ', ' + lib.get_string('err:invalidsetting', user.get_guild()))
 
         guild.update_setting(setting, value)
         return await context.send(user.get_mention() + ', ' + lib.get_string('setting:updated', guild.get_id()).format(setting, value))

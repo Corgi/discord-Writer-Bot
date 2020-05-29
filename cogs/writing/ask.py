@@ -9,11 +9,14 @@ class Ask(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
+        self._supported_questions = ('c', 'char', 'character', 'w', 'world')
         self._arguments = [
             {
                 'key': 'type',
                 'prompt': 'ask:arguments',
                 'required': True,
+                'check': lambda content: content in self._supported_questions,
+                'error': 'ask:error'
             }
         ]
 
@@ -42,9 +45,6 @@ class Ask(commands.Cog, CommandWrapper):
             options = lib.get_asset('q_char', user.get_guild())
         elif type in ('w', 'world'):
             options = lib.get_asset('q_world', user.get_guild())
-        else:
-            await context.send( user.get_mention() + ', ' + lib.get_string('ask:error', user.get_guild()) )
-            return
 
         max = len(options) - 1
         rand = random.randint(1, max)

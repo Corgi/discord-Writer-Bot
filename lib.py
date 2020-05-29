@@ -1,8 +1,8 @@
-import os
-import json
+import json, os, pytz
 from collections import namedtuple
 from pprint import pprint
 from os import path
+from datetime import datetime, timezone, timedelta, time
 
 def get(file,as_object=True):
     """
@@ -72,3 +72,34 @@ def find_in_array(lst, key, value):
         if dic[key] == value:
             return lst[i]
     return False
+
+def is_number(value):
+    """
+    Check if a variable is a number (either int or can be converted to int)
+    This also returns 1 for True, but it's good enough for now as it'll only be used for checking strings
+    :param value:
+    :return:
+    """
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return False
+
+def get_midnight_utc(timezone):
+    """
+    Given a timezone name, get the UTC timestamp for midnight tomorrow.
+    Used in things like goal resets, so that they reset at midnight in the user's timezone.
+
+    :param timezone:
+    :return:
+    """
+
+    tz = pytz.timezone(timezone)
+
+    today = datetime.now(tz)
+    tomorrow = today + timedelta(days=1)
+
+    midnight = tz.localize( datetime.combine(tomorrow, time(0, 0, 0, 0)), is_dst=None )
+    midnight_utc = midnight.astimezone(pytz.utc)
+
+    return int(midnight_utc.timestamp())

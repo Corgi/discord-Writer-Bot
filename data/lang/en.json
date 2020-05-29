@@ -74,7 +74,7 @@
     "reset:pb": "words-per-minute PB reset to 0",
     "reset:wc": "total word count reset to 0",
     "reset:done": "profile reset",
-    "reset:invalid": "Invalid reset option, must be one of {}",
+    "reset:invalid": "Invalid reset option, must be one of `pb`, `wc`, `xp`, `all`",
     "reset:server": "whole server stats reset to 0",
     "reset:xp": "xp/level reset",
     "reset:argument:what": "What do you want to reset? WPM personal best: `pb`, Total word count: `wc`, Experience/Level: `xp`, or your entire profile: `all`?",
@@ -108,9 +108,9 @@
 
 
     "goal:status": "You are %s **%s%** of the way to your %s goal. (%s/%s)",
-    "goal:nogoal": "You do not currently have a %s goal. I think you should set one, e.g. `goal set <wordcount>`",
+    "goal:nogoal": "You do not currently have a {} goal. Maybe think you should set one? `goal set <wordcount>`",
     "goal:givenup": "has given up on their goal. Boo.",
-    "goal:set": "%s goal set to **%s** words. Get writing!",
+    "goal:set": "{} goal set to **{}** words. This will reset every midnight ({}). Now, get writing!",
 
     "project:setnames": "Please make sure your project shortname and title are set: `project create shortname title` (e.g. `project create test My Test Book`)",
     "project:exists": "You already have a project with that shortname",
@@ -172,7 +172,9 @@
     "event:noendtime": "This event does not have a scheduled end date/time. It will end when someone manually ends it.",
 
     "wrote:addedtoproject": "added %s words to their project **%s** (%s)",
-    "wrote:added": "added %s to their total words written **(%s)**",
+    "wrote:added": "added {} to their total words written **({})**",
+    "wrote:argument:amount": "How many words did you write?",
+    "wrote:err:type": "Amount of words must be a number",
 
     "stats:words": "Words Written: ",
     "stats:sprints": "Sprints Run: ",
@@ -192,7 +194,7 @@
     "wordcount": "Word Count",
     "finalwordcount": "Finished Word Count",
     "serverstats": "Overall Server Statistics",
-    "serverstats:info": "Currently this includes users who have left the guild. In the future this will exclude their results."
-
+    "serverstats:info": "Currently this includes users who have left the guild. In the future this will exclude their results.",
+    "req:timeout": "Request for response timed out"
 
 }

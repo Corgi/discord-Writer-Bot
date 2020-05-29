@@ -141,6 +141,9 @@ class User:
         # If the user already has a value for this stat, we want to update
         user_stat = self.get_stat(name)
 
+        # Update the value in the array
+        self._stats[name] = amount
+
         if user_stat:
             return self.__db.update('user_stats', {'value': amount}, {'user': self._id, 'name': name})
 
@@ -154,7 +157,7 @@ class User:
         user_stat = self.get_stat(name)
 
         if user_stat:
-            amount += int(user_stat)
+            amount = int(amount) + int(user_stat)
 
         # Now return the update_stat with the new amount (if incremented)
         return self.update_stat(name, amount)
@@ -196,6 +199,9 @@ class User:
         # If the user already has a value for this setting, we want to update
         user_setting = self.get_setting(setting)
 
+        # Update the value in the array
+        self._settings[setting] = value
+
         if user_setting:
             return self.__db.update('user_settings', {'value': value}, {'user': self._id, 'setting': setting})
 
@@ -232,9 +238,31 @@ class User:
         # If the user already has a value for this record, we want to update
         user_record = self.get_record(name)
 
+        # Update the value in the array
+        self._records[name] = value
+
         if user_record:
             return self.__db.update('user_records', {'value': value}, {'user': self._id, 'record': name})
 
         # Otherwise, we want to insert a new one
         else:
             return self.__db.insert('user_records', {'user': self._id, 'record': name, 'value': value})
+
+    def calculate_user_reset_time(self):
+        timezone = self.get_setting('timezone') or 'UTC'
+        return lib.get_midnight_utc(timezone)
+
+    def get_goal(self, type):
+        return self.__db.get('user_goals', {'user': self._id, 'type': type})
+
+    def set_goal(self, type, value):
+
+        user_goal = self.get_goal(type)
+        if user_goal:
+            return self.__db.update('user_goals', {'goal': value}, {'id': user_goal['id']})
+        else:
+            next_reset = self.calculate_user_reset_time()
+            return self.__db.insert('user_goals', {'type': type, 'goal': value, 'user': self._id, 'current': 0, 'completed': 0, 'reset': next_reset})
+
+    def delete_goal(self, type):
+        return self.__db.delete('user_goals', {'user': self._id, 'type': type})

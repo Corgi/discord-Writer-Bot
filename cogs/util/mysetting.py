@@ -13,7 +13,9 @@ class MySetting(commands.Cog, CommandWrapper):
             {
                 'key': 'setting',
                 'prompt': 'mysetting:argument:setting',
-                'required': True
+                'required': True,
+                'check': lambda content : content in self._supported_settings,
+                'error': 'err:invalidsetting'
             },
             {
                 'key': 'value',
@@ -37,7 +39,7 @@ class MySetting(commands.Cog, CommandWrapper):
         user = User(context.message.author.id, context.guild.id, context)
 
         # If we want to list the setting, do that instead.
-        if setting.lower() == 'list':
+        if setting is not None and setting.lower() == 'list':
             settings = user.get_settings()
             output = '```ini\n';
             if settings:
@@ -55,11 +57,6 @@ class MySetting(commands.Cog, CommandWrapper):
 
         setting = args['setting'].lower()
         value = args['value']
-
-        # Check if the setting is actually valid
-        if setting not in self._supported_settings:
-            await context.send( user.get_mention() + ', ' + lib.get_string('err:invalidsetting', user.get_guild()) )
-            return
 
         # If the setting is timezone convert the value
         if setting == 'timezone':

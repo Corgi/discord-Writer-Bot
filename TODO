@@ -1,7 +1,6 @@
 - Commands
     - util
         - about (sprint info)
-        - setting
         - stats
     - writing
         - event
@@ -10,7 +9,7 @@
         - project
         - prompt
         - sprint
-        - wrote
+        - wrote (project/event/goal)
 - Crons
 - Check things like prefix setting
 - Script to remove duplicates from user_records and user_stats, etc... and keep highest ones, as removing guild column from all user_* things to make info follow across servers

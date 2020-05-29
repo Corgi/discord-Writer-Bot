@@ -15,7 +15,9 @@ class Reset(commands.Cog, CommandWrapper):
             {
                 'key': 'what',
                 'prompt': 'reset:argument:what',
-                'required': True
+                'required': True,
+                'check': lambda content: content in self._supported_resets,
+                'error': 'reset:invalid'
             },
             {
                 'key': 'confirm',
@@ -34,7 +36,7 @@ class Reset(commands.Cog, CommandWrapper):
             !reset pb: Resets your wpm personal best
             !reset wc: Resets your total word count
             !reset xp: Resets your xp/level to 0
-            !reset all: Resets your entire profile
+            !reset all: Resets your xp/levels, stats, records, goals and challenges
         """
 
         user = User(context.message.author.id, context.guild.id, context)
@@ -46,10 +48,6 @@ class Reset(commands.Cog, CommandWrapper):
 
         what = args['what'].lower()
         confirm = args['confirm'].lower()
-
-        # Make sure the reset option is one of the supported ones
-        if what not in self._supported_resets:
-            return await context.send( lib.get_string('reset:invalid', user.get_guild()).format( ','.join('`{}`'.format(el) for el in self._supported_resets ) ) )
 
         # Make sure they confirmed it, otherwise just stop and display an OK message
         if confirm not in ('y', 'yes'):

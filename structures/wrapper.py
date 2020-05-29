@@ -7,7 +7,6 @@ class CommandWrapper:
 
     def __init__(self):
         self._arguments = []
-        pass
 
     async def check_arguments(self, context, **kwargs):
 
@@ -25,61 +24,66 @@ class CommandWrapper:
 
                     response = await self.prompt(context, arg)
                     if response:
+                        # Set the content back into the keyword arguments to be accessed from the calling command
                         kwargs[arg['key']] = response.content
+                        value = kwargs[arg['key']]
                     else:
                         return False
 
+                # We got a response, now do we need to check the type or do any extra content checks?
+                if not await self.check_content(arg, value, context):
+                    return False
+
+
         return kwargs
+
+    async def check_content(self, argument, content, context):
+
+        result = True
+
+        # Do we need to check the type?
+        # The only type checking we do is str or int, as that's basically all they can supply.
+        # Assumption is that str is anything that is not a number.
+        if 'type' in argument and argument['type'] is int and not lib.is_number(content):
+            result = False
+        elif 'type' in argument and argument['type'] is str and lib.is_number(content):
+            result = False
+
+        # Do we need to do any extra checks?
+        if 'check' in argument and callable(argument['check']):
+            content = content.lower()
+            if not argument['check'](content):
+                result = False
+
+        # If the result is false and the argument specifies an error message, send that.
+        if result is False and 'error' in argument:
+            await context.send( context.message.author.mention + ', ' + lib.get_string(argument['error'], context.guild.id) )
+
+        return result
+
 
     async def prompt(self, context, argument, raw_message=False, timeout=None):
 
         # Get the message we want to use for the prompt
         message = argument['prompt']
 
-        # Get any extra check we want to do for this argument, to check the value is in a specific format
-        extra_check = argument['check'] if 'check' in argument else False
-
         # Use default timeout is none specified
         if timeout is None:
             timeout = self.TIMEOUT_WAIT
-
-        # Check if the response is from the same user, in the same channel.
-        def check_message(msg):
-            return msg.author == context.author and msg.channel == context.channel and not msg.content.startswith(context.prefix)
-
-        # Store the name of the function to call in the variable 'call_check'
-        call_check = check_message
-
-        # If we specified an extra check, we want to check that as well.
-        if callable(extra_check):
-
-            # If the extra_check is a lambda, then define a new function to use in the response check
-            def check_message_extra(msg):
-                return check_message(msg) and extra_check(msg.content.lower())
-
-            # And then assign it to the 'call_check' variable
-            call_check = check_message_extra
 
         # Send the prompt message and wait for a reply
         if not raw_message:
             message = lib.get_string(message, context.guild.id)
 
+        # Define the function we use to check the value
+        def _check(msg):
+            return msg.author == context.author and msg.channel == context.channel and not msg.content.startswith(context.prefix)
+
+        # Send the prompt message asking for the argument and await response
         req = await context.send(f'{context.author.mention}, {message}')
         try:
-            response = await self.bot.wait_for('message', check=call_check, timeout=timeout)
+            response = await self.bot.wait_for('message', check=_check, timeout=timeout)
             return response
         except asyncio.TimeoutError:
-            await req.edit(content='Request for response timed out')
+            await req.edit(content=lib.get_string('req:timeout', context.guild.id))
             return False
-
-# @commands.command()
-# async def foo(ctx, bar=None):
-#   if bar is None:
-#     req = await ctx.send(f'{ctx.author.mention}: please supply arg bar')
-#     try:
-#       msg = await ctx.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel, timeout=30)
-#     except asyncio.TimeoutError:
-#       await req.edit(content='Request for arg bar timed out')
-#       return
-#     bar = msg.content
-#   ...  # rest of command

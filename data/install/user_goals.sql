@@ -5,6 +5,5 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal INTEGER NOT NULL,
     current INTEGER NOT NULL,
     completed BOOLEAN NOT NULL,
-    reset BIGINT NOT NULL,
-    lastreset BIGINT NOT NULL
+    reset BIGINT NOT NULL
 );

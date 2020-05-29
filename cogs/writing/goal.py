@@ -1,4 +1,4 @@
-import discord, lib
+import discord, lib, math
 from discord.ext import commands
 from structures.db import Database
 from structures.user import User
@@ -74,9 +74,24 @@ class Goal(commands.Cog, CommandWrapper):
         # Currently only daily goals implemented
         type = 'daily'
 
-        goal = user.get_goal(type)
-        if goal:
-            pass
+        user_goal = user.get_goal(type)
+        if user_goal:
+
+            percent = math.floor( (user_goal['current'] / user_goal['goal']) * 100 )
+            progress = {}
+            progress['done'] = math.floor(percent / 10)
+            progress['left'] = 10 - progress['done']
+
+            # Can't be more than 10 or less than 0
+            if progress['done'] > 10:
+                progress['done'] = 10
+
+            if progress['left'] < 0:
+                progress['left'] = 0
+
+            percent_str = '[' + ('-' * progress['done']) + ('  ' * progress['left']) + ']'
+            return await context.send(user.get_mention() + ', ' + lib.get_string('goal:status', user.get_guild()).format(percent_str, percent, type, user_goal['current'], user_goal['goal']))
+
         else:
             return await context.send(user.get_mention() + ', ' + lib.get_string('goal:nogoal', user.get_guild()).format(type))
 

@@ -107,7 +107,7 @@
     "challenge:noactiveserver": "There are no active challenges on this server.",
 
 
-    "goal:status": "You are %s **%s%** of the way to your %s goal. (%s/%s)",
+    "goal:status": "You are {} **{}%** of the way to your {} goal. ({}/{})",
     "goal:nogoal": "You do not currently have a {} goal. Maybe think you should set one? `goal set <wordcount>`",
     "goal:givenup": "has given up on their goal. Boo.",
     "goal:set": "{} goal set to **{}** words. This will reset every midnight ({}). Now, get writing!",

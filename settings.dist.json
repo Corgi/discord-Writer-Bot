@@ -1,4 +1,11 @@
 {
     "token": "",
-    "prefix": "~"
+    "prefix": "~",
+    "version": "",
+    "src": "",
+    "patch_notes": "",
+    "db_host": "",
+    "db_user": "",
+    "db_pass": "",
+    "db_name": ""
 }

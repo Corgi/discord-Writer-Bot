@@ -68,7 +68,7 @@ class User:
 
         user_xp = self.get_xp()
         if user_xp:
-            amount += user_xp['xp']
+            amount += int(user_xp['xp'])
 
         return self.update_xp(amount)
 
@@ -266,3 +266,36 @@ class User:
 
     def delete_goal(self, type):
         return self.__db.delete('user_goals', {'user': self._id, 'type': type})
+
+    async def add_to_goal(self, type, amount):
+
+        user_goal = self.get_goal(type)
+        if user_goal:
+
+            value = int(amount) + int(user_goal['current'])
+            if value < 0:
+                value = 0
+
+            # Is the goal completed now?
+            already_completed = user_goal['completed']
+            completed = user_goal['completed']
+            if value >= user_goal['goal'] and not already_completed:
+                completed = 1
+
+            self.__db.update('user_goals', {'current': value, 'completed': completed}, {'id': user_goal['id']})
+
+            # If we just met the goal, increment the XP and print out a message
+            if completed and not already_completed:
+
+                # Increment stat of goals completed
+                self.add_stat(type + '_goals_completed', 1)
+
+                # Increment XP
+                await self.add_xp(Experience.XP_COMPLETE_GOAL[type])
+
+                # Print message
+                await self.__context.send(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))
+
+
+        else:
+            return

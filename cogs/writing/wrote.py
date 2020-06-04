@@ -53,8 +53,8 @@ class Wrote(commands.Cog, CommandWrapper):
         user.add_stat('total_words_written', amount)
 
         # # Update their words towards their daily goal
-        # # TODO
-        #
+        await user.add_to_goal('daily', amount)
+
         # Output message
         total = user.get_stat('total_words_written')
         return await context.send( user.get_mention() + ', ' + lib.get_string('wrote:added', user.get_guild()).format(str(amount), str(total)) )

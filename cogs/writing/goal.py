@@ -34,7 +34,7 @@ class Goal(commands.Cog, CommandWrapper):
 
         if option == 'set':
             return await self.run_set(context, value)
-        elif option == 'cancel' or option == 'delete':
+        elif option == 'cancel' or option == 'delete' or option == 'reset':
             return await self.run_cancel(context)
         else:
             return await self.run_check(context)
@@ -94,8 +94,6 @@ class Goal(commands.Cog, CommandWrapper):
 
         else:
             return await context.send(user.get_mention() + ', ' + lib.get_string('goal:nogoal', user.get_guild()).format(type))
-
-
 
 
 def setup(bot):

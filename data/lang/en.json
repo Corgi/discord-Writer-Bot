@@ -111,6 +111,7 @@
     "goal:nogoal": "You do not currently have a {} goal. Maybe think you should set one? `goal set <wordcount>`",
     "goal:givenup": "has given up on their goal. Boo.",
     "goal:set": "{} goal set to **{}** words. This will reset every midnight ({}). Now, get writing!",
+    "goal:met": "{} met their {} goal of {} words!      +{}xp",
 
     "project:setnames": "Please make sure your project shortname and title are set: `project create shortname title` (e.g. `project create test My Test Book`)",
     "project:exists": "You already have a project with that shortname",
@@ -183,6 +184,21 @@
     "stats:challenges": "Challenges Completed: ",
     "stats:projects": "Projects On-the-Go: ",
     "stats:projectscompleted": "Projects Completed: ",
+
+    "generate:argument:type": "What type of name do you want to generate?",
+    "generate:argument:amount": "How many names do you want to generate?",
+    "generate:err:type": "Invalid generator type",
+    "generate:message": "Here are your {} {}:\n\n",
+    "generate:type:char": "character names",
+    "generate:type:place": "fantasy place names",
+    "generate:type:land": "fantasy land names",
+    "generate:type:book": "book titles",
+    "generate:type:book_fantasy": "fantasy book titles",
+    "generate:type:book_sf": "sci-fi book titles",
+    "generate:type:book_hp": "Harry Potter book titles",
+    "generate:type:book_mystery": "mystery book titles",
+    "generate:type:book_rom": "romance/erotic book titles",
+    "generate:type:idea": "story ideas",
 
 
     "a": "a",

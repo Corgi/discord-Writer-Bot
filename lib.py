@@ -51,10 +51,13 @@ def get_asset(asset, guild_id):
     file = './assets/json/' + get_lang(guild_id) + '/' + asset + '.json'
 
     # Try and get the file in the server's language first. If not, default to 'en'
-    if path.exists(file):
-        return get(file)
-    else:
-        return get('./assets/json/en/' + asset + '.json')
+    try:
+        if path.exists(file):
+            return get(file, False)
+        else:
+            return get('./assets/json/en/' + asset + '.json', False)
+    except FileNotFoundError:
+        return False
 
 
 def find_in_array(lst, key, value):

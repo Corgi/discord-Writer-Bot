@@ -8,7 +8,7 @@ class Generate(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_types = ['char', 'place', 'land', 'idea', 'book', 'book_fantasy', 'book_horror', 'book_hp', 'book_mystery', 'book_rom', 'book_sf']
+        self._supported_types = ['char', 'place', 'land', 'idea', 'book', 'book_fantasy', 'book_horror', 'book_hp', 'book_mystery', 'book_rom', 'book_sf', 'prompt']
         self._arguments = [
             {
                 'key': 'type',
@@ -28,21 +28,22 @@ class Generate(commands.Cog, CommandWrapper):
     @commands.command(name="generate")
     async def generate(self, context, type=None, amount=None):
         """
-        Random generator for various things (character names, place names, land names, book titles, story ideas).
+        Random generator for various things (character names, place names, land names, book titles, story ideas, prompts).
         Define the type of item you wanted generated and then optionally, the amount of items to generate.
 
         Examples:
-            !generate char !generates 10 character names
-            !generate place 20 !generates 20 fantasy place names
-            !generate land !generates 10 fantasy land/world names
-            !generate book !generates 10 general fiction book titles
-            !generate book_fantasy !generates 10 fantasy book titles
-            !generate book_sf !generates 10 sci-fi book titles
-            !generate book_horror !generates 10 horror book titles
-            !generate book_rom !generates 10 romance/erotic book titles
-            !generate book_mystery !generates 10 mystery book titles
-            !generate book_hp !generates 10 Harry Potter book title
-            !generate idea !generates a random story idea
+            !generate char - generates 10 character names
+            !generate place 20 - generates 20 fantasy place names
+            !generate land - generates 10 fantasy land/world names
+            !generate book - generates 10 general fiction book titles
+            !generate book_fantasy - generates 10 fantasy book titles
+            !generate book_sf - generates 10 sci-fi book titles
+            !generate book_horror - generates 10 horror book titles
+            !generate book_rom - generates 10 romance/erotic book titles
+            !generate book_mystery - generates 10 mystery book titles
+            !generate book_hp - generates 10 Harry Potter book title
+            !generate idea - generates a random story idea
+            !generate prompt - generates a story prompt
         """
 
         user = User(context.message.author.id, context.guild.id, context)

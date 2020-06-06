@@ -199,6 +199,15 @@
     "generate:type:book_mystery": "mystery book titles",
     "generate:type:book_rom": "romance/erotic book titles",
     "generate:type:idea": "story ideas",
+    "generate:type:prompt": "prompts",
+
+    "sprint:argument:cmd": "Where you trying to run `!sprint start`? Run `!help sprint` if you need more information on the sprint command.",
+    "sprint:cancelled": "**Sprint has been cancelled**: ",
+    "sprint:scheduled": "**A new sprint has been scheduled**\nSprint will start in approx {} minutes and will run for {} minute(s). Use `sprint join <wordcount>` to join this sprint.\n",
+    "sprint:err:cmd": "Invalid sprint command... Run `!help sprint` for more information on the sprint command.",
+    "sprint:err:alreadyexists": "There is already a sprint running on this server. Please wait until it has finished before creating a new one.",
+    "sprint:err:noexists": "There is no active sprint on this server. Maybe you should start one? `sprint start`",
+    "sprint:err:cannotcancel": "Only the sprint creator or the server admin can cancel this sprint",
 
 
     "a": "a",

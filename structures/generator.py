@@ -23,8 +23,8 @@ class NameGenerator:
         if amount is None or amount < 1:
             amount = self.DEFAULT_AMOUNT
 
-        # If the type is 'idea', change the amount to 1, as that will take up too much space.
-        if self.type == 'idea':
+        # If the type is 'idea' or 'prompt', change the amount to 1, as that will take up too much space.
+        if self.type == 'idea' or self.type == 'prompt':
             amount = 1
 
         asset_file = 'gen_' + self.type
@@ -92,7 +92,7 @@ class NameGenerator:
         generated_names.sort()
 
         # Uppercase the first letter of each word, if it's anything but idea generation
-        if self.type != 'idea':
+        if self.type != 'idea' and self.type != 'prompt':
             generated_names = map(lambda el : string.capwords(el), generated_names)
 
         # Generate the message

@@ -1,4 +1,4 @@
-import json, os, pytz
+import json, math, os, pytz
 from collections import namedtuple
 from pprint import pprint
 from os import path
@@ -106,3 +106,20 @@ def get_midnight_utc(timezone):
     midnight_utc = midnight.astimezone(pytz.utc)
 
     return int(midnight_utc.timestamp())
+
+def secs_to_mins(seconds):
+    """
+    Convert a number of seconds, into minutes and seconds
+    E.g. 65 seconds -> 1 minute 5 seconds
+    :param seconds:
+    :return: dict
+    """
+    result = {'m': 0, 's': 0}
+
+    if seconds < 60:
+        result['s'] = seconds
+    else:
+        result['m'] = math.floor( seconds / 60 )
+        result['s'] = math.ceil( seconds % 60 )
+
+    return result

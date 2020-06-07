@@ -78,7 +78,8 @@ def find_in_array(lst, key, value):
 
 def is_number(value):
     """
-    Check if a variable is a number (either int or can be converted to int)
+    Check if a variable is a number (either int or can be converted to int). If it can be converted to int, it returns
+    that number. Otherwise returns False.
     This also returns 1 for True, but it's good enough for now as it'll only be used for checking strings
     :param value:
     :return:

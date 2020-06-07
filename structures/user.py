@@ -209,6 +209,29 @@ class User:
         else:
             return self.__db.insert('user_settings', {'user': self._id, 'setting': setting, 'value': value})
 
+    def get_guild_setting(self, setting):
+        """
+        Get a user setting on a specific guild.
+        This is mostly just used for things like sprint notifications. It's not settings they can manually set with the !myset command
+        This is used more rarely, so we won't bother loading the settings into an array, we'll just go fetch it
+        :param int setting:
+        :return:
+        """
+        return self.__db.get('user_settings', {'user': self._id, 'setting': setting, 'guild': self._guild})
+
+    def set_guild_setting(self, setting, value):
+        """
+        Set a user's setting for a specific guild
+        :param str setting:
+        :param str value:
+        :return: Result of update or insert query
+        """
+        result = self.get_guild_setting(setting)
+        if result:
+            return self.__db.update('user_settings', {'value': value}, {'id': result['id']})
+        else:
+            return self.__db.insert('user_settings', {'user': self._id, 'guild': self._guild, 'setting': setting, 'value': value})
+
     def get_record(self, name):
 
         # If the records property is None, then load it up first

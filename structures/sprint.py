@@ -1,4 +1,4 @@
-import lib, time
+import lib, numpy, time
 from structures.db import Database
 from structures.user import User
 
@@ -71,18 +71,43 @@ class Sprint:
         now = int(time.time())
         return self.exists() and now > self.end
 
+    def has_started(self):
+        """
+        Check if the sprint has started yet
+        :return:
+        """
+        now = int(time.time())
+        return self.start <= now
+
+    def is_user_sprinting(self, user_id):
+        """
+        Check if a given user is in the sprint
+        :param int user_id:
+        :return:
+        """
+        users = self.get_users()
+        user_ids = [e['id'] for e in users]
+        return user_id in user_ids
+
     def get_users(self):
         """
         Get an array of all the sprint_users records for users taking part in this sprint
         :return:
         """
-        return self.__db.get_all('sprint_users', {'sprint': self.id})
+        users = self.__db.get_all('sprint_users', {'sprint': self.id})
+        return [row['user'] for row in users]
 
     def get_notify_users(self):
         """
         Get an array of all the users who want to be notified about new sprints on this server
         :return:
         """
+        notify = self.__db.get_all('user_settings', {'guild': self.guild, 'setting': 'sprint_notify', 'value': 1})
+        notify_ids = [row['user'] for row in notify]
+
+        # We don't need to notify users who are already in the sprint, so we can exclude those
+        users_ids = self.get_users()
+        return numpy.setdiff1d(notify_ids, users_ids).tolist()
 
     def get_notifications(self, users):
         """
@@ -90,8 +115,8 @@ class Sprint:
         :return:
         """
         notify = []
-        for u in users:
-            usr = User(u['user'], self.guild)
+        for user_id in users:
+            usr = User(user_id, self.guild)
             notify.append(usr.get_mention())
         return notify
 
@@ -148,8 +173,12 @@ class Sprint:
 
         # Build the message to display
         message = lib.get_string('sprint:started', guild_id).format(self.length)
+        message += ', '.join( self.get_notifications(self.get_users()) )
 
-        #TODO: Notify users who want notifications
+        # Add mentions for any user who wants to be notified
+        notify = self.get_notify_users()
+        if notify:
+            message += lib.get_string('sprint:notifications', guild_id).format( ', '.join(self.get_notifications(notify)) )
 
         # If we passed the context through (ie. we are posting this message straight after the sprint start command) then we can use the context as normal
         if context is not None:
@@ -157,6 +186,7 @@ class Sprint:
 
         # If not, it must be from the cron as they asked for a delay and we need to use the bot object
         else:
+            # TODO
             pass
 
 
@@ -170,7 +200,10 @@ class Sprint:
         delay = lib.secs_to_mins((self.start + 2) - now) # Add 2 seconds in case its slow to post the message. Then it will display the higher minute instead of lower.
         message = lib.get_string('sprint:scheduled', context.guild.id).format( delay['m'], self.length )
 
-        #TODO: Notify any users who want to be notified about new sprints
+        # Add mentions for any user who wants to be notified
+        notify = self.get_notify_users()
+        if notify:
+            message += lib.get_string('sprint:notifications', context.guild.id).format(', '.join(self.get_notifications(notify)))
 
         # Print the message to the channel
         return await context.send(message)

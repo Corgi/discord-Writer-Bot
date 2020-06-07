@@ -66,6 +66,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
             !sprint status - Shows you your current word count on the sprint,
             !sprint help - Displays a similar help screen to this one, with a few added bits of info
         """
+        user = User(context.message.author.id, context.guild.id, context)
 
         # Check the arguments are valid
         args = await self.check_arguments(context, cmd=cmd, opt1=opt1, opt2=opt2, opt3=opt3)
@@ -78,24 +79,110 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Start a sprint
         if cmd == 'start':
             return await self.run_start(context)
-        elif cmd == 'for' and (opt2.lower() == 'in' or opt2.lower() == 'at' or opt2.lower() == 'now'):
+        elif cmd == 'for':
 
             length = opt1
+
+            # If the second option is invalid, display an error message
+            if opt2 is None or opt2.lower() not in ['now', 'in']:
+                return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:for:unknown', user.get_guild()))
 
             if opt2.lower() == 'now':
                 delay = 0
             elif opt2.lower() == 'in':
                 delay = opt3
-            elif opt2.lower() == 'at':
-                # TODO 'at'
-                return print('TODO')
 
             return await self.run_start(context, length, delay)
 
         elif cmd == 'cancel':
             return await self.run_cancel(context)
 
-        print('OK')
+        elif cmd == 'notify':
+            return await self.run_notify(context)
+
+        elif cmd == 'forget':
+            return await self.run_forget(context)
+
+        elif cmd == 'time':
+            return await self.run_time(context)
+
+        elif cmd == 'join':
+            return await self.run_join(opt1, opt2)
+
+
+    async def run_join(self, starting_wc=None, project_shortname=None):
+        """
+        Join the sprint, with an optional starting word count and project shortname
+        :param starting_wc:
+        :param project_shortname:
+        :return:
+        """
+        # user = User(context.message.author.id, context.guild.id, context)
+        # sprint = Sprint(user.get_guild())
+        #
+        # # If there is no active sprint, then just display an error
+        # if not sprint.exists():
+        #     return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+        #
+        # starting_wc = lib.is_number(starting_wc)
+        # if starting_wc is False:
+        #     starting_wc = 0
+        #
+        # # If the user is already sprinting, then just update their starting wordcount
+        # if sprint.is_user_sprinting(user.get_id()):
+        #     sprint.
+
+
+
+    async def run_time(self, context):
+        """
+        Get how long is left in the sprint
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        now = int(time.time())
+
+        # If the sprint has not yet started, display the time until it starts
+        if not sprint.has_started():
+            left = lib.secs_to_mins(sprint.start - now)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:startsin', user.get_guild()).format(left['m'], left['s']))
+
+        # If it's currently still running, display how long is left
+        elif not sprint.is_finished():
+            left = lib.secs_to_mins(sprint.end - now)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:timeleft', user.get_guild()).format(left['m'], left['s']))
+
+        # If it's finished but not yet marked as completed, we must be waiting for word counts
+        elif sprint.is_finished():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:waitingforwc', user.get_guild()))
+
+
+    async def run_notify(self, context):
+        """
+        Set a user to be notified of upcoming sprints on this server.
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        user.set_guild_setting('sprint_notify', 1)
+        return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:notified', user.get_guild()))
+
+    async def run_forget(self, context):
+        """
+        Set a user to no longer be notified of upcoming sprints on this server.
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        user.set_guild_setting('sprint_notify', 0)
+        return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:forgot', user.get_guild()))
 
     async def run_cancel(self, context):
         """
@@ -107,7 +194,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         sprint = Sprint(user.get_guild())
 
         # If there is no active sprint, then just display an error
-        if not sprint:
+        if not sprint.exists():
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
 
         # If they do not have permission to cancel this sprint, display an error

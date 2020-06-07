@@ -9,6 +9,8 @@ class Sprint:
         # Initialise the database instance
         self.__db = Database.instance()
 
+        self.bot = None
+
         # Initialise the variables to match the database record
         self.id = None
         self.guild = guild_id
@@ -52,6 +54,13 @@ class Sprint:
         else:
             return False
 
+    def set_bot(self, bot):
+        """
+        Set the discord bot object into the sprint to be used for sending messages in the cron
+        :param bot:
+        :return:
+        """
+        self.bot = bot
 
     def is_finished(self):
         """
@@ -63,7 +72,28 @@ class Sprint:
         return self.exists() and now > self.end
 
     def get_users(self):
+        """
+        Get an array of all the sprint_users records for users taking part in this sprint
+        :return:
+        """
         return self.__db.get_all('sprint_users', {'sprint': self.id})
+
+    def get_notify_users(self):
+        """
+        Get an array of all the users who want to be notified about new sprints on this server
+        :return:
+        """
+
+    def get_notifications(self, users):
+        """
+        Get an array of user mentions for each person in the supplied array of userids
+        :return:
+        """
+        notify = []
+        for u in users:
+            usr = User(u['user'], self.guild)
+            notify.append(usr.get_mention())
+        return notify
 
     def complete(self):
         """
@@ -91,10 +121,7 @@ class Sprint:
 
         # Get the users sprinting and create an array of mentions
         users = self.get_users()
-        notify = []
-        for u in users:
-            usr = User(u['user'], context.guild.id)
-            notify.append(usr.get_mention())
+        notify = self.get_notifications(users)
 
         # Load current user
         user = User(context.message.author.id, context.guild.id, context)
@@ -110,6 +137,28 @@ class Sprint:
         message = lib.get_string('sprint:cancelled', user.get_guild())
         message = message + ', '.join(notify)
         return await context.send(message)
+
+    async def post_start(self, context=None):
+        """
+        Post the sprint start message
+        :param: context This is passed through when posting start immediately. Otherwise if its in a cron job, it will be None and we will use the bot object.
+        :return:
+        """
+        guild_id = context.guild.id if context is not None else self.guild
+
+        # Build the message to display
+        message = lib.get_string('sprint:started', guild_id).format(self.length)
+
+        #TODO: Notify users who want notifications
+
+        # If we passed the context through (ie. we are posting this message straight after the sprint start command) then we can use the context as normal
+        if context is not None:
+            return await context.send(message)
+
+        # If not, it must be from the cron as they asked for a delay and we need to use the bot object
+        else:
+            pass
+
 
     async def post_delayed_start(self, context):
         """

@@ -78,6 +78,20 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Start a sprint
         if cmd == 'start':
             return await self.run_start(context)
+        elif cmd == 'for' and (opt2.lower() == 'in' or opt2.lower() == 'at' or opt2.lower() == 'now'):
+
+            length = opt1
+
+            if opt2.lower() == 'now':
+                delay = 0
+            elif opt2.lower() == 'in':
+                delay = opt3
+            elif opt2.lower() == 'at':
+                # TODO 'at'
+                return print('TODO')
+
+            return await self.run_start(context, length, delay)
+
         elif cmd == 'cancel':
             return await self.run_cancel(context)
 
@@ -105,6 +119,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
     async def run_start(self, context, length=None, start=None):
         """
         Try to start a sprint on the server
+        :param context
         :param length: Length of time (in minutes) the sprint should last
         :param start: Time in minutes from now, that the sprint should start
         :return:
@@ -126,11 +141,11 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Must be okay to continue #
 
         # If the length argument is not valid, use the default
-        if length is None or not lib.is_number(length) or length <= 0 or length > self.MAX_LENGTH:
+        if length is None or lib.is_number(length) is False or lib.is_number(length) <= 0 or lib.is_number(length) > self.MAX_LENGTH:
             length = self.DEFAULT_LENGTH
 
         # Same goes for the start argument
-        if start is None or not lib.is_number(start) or start < 0 or start > self.MAX_DELAY:
+        if start is None or lib.is_number(start) is False or lib.is_number(start) < 0 or lib.is_number(start) > self.MAX_DELAY:
             start = self.DEFAULT_DELAY
 
         # Make sure we are using ints and not floats passed through in the command
@@ -154,7 +169,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Are we starting immediately or after a delay?
         if start == 0:
             # Immediately
-            await sprint.post_start(context)
+            return await sprint.post_start(context)
         else:
             # Delay
             return await sprint.post_delayed_start(context)

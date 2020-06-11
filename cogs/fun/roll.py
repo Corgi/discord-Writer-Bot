@@ -5,6 +5,9 @@ from discord.ext import commands
 
 class Roll(commands.Cog):
 
+    MAX_SIDES = 1000000000000
+    MAX_ROLLS = 100
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,17 +32,15 @@ class Roll(commands.Cog):
             await context.send( lib.get_string('roll:format', guild_id) );
             return
 
-        # Number of rolls or sides cannot be less than 1
-        # Nor can they be more than 100
         if sides < 1:
             sides = 1
-        elif sides > 100:
-            sides = 100
+        elif sides > self.MAX_SIDES:
+            sides = self.MAX_SIDES
 
         if rolls < 1:
             rolls = 1
-        elif rolls > 100:
-            rolls = 100
+        elif rolls > self.MAX_ROLLS:
+            rolls = self.MAX_ROLLS
 
         total = 0
         output = ''

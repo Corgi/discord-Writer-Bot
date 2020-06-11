@@ -15,7 +15,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'users', 'wc', 'help', 'pb', 'notify', 'forget', 'project', 'status']
+        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'wc', 'help', 'pb', 'notify', 'forget', 'project', 'status']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -59,7 +59,6 @@ class SprintCommand(commands.Cog, CommandWrapper):
             !sprint project sword - Sets your sprint to count towards your Project with the shortname "sword" (See: Projects for more info),
             !sprint wc 250 - Declares your final word count at 250,
             !sprint time - Displays the time left in the current sprint,
-            !sprint users - Displays a list of the users taking part in the current sprint,
             !sprint pb - Displays your personal best wpm from sprints on this server. Run sprint pb reset to reset your personal best to 0 on the current server,
             !sprint notify - You will be notified when someone starts a new sprint,
             !sprint forget - You will no longer be notified when someone starts a new sprint,
@@ -106,31 +105,101 @@ class SprintCommand(commands.Cog, CommandWrapper):
         elif cmd == 'time':
             return await self.run_time(context)
 
+        elif cmd == 'leave':
+            return await self.run_leave(context)
+
         elif cmd == 'join':
-            return await self.run_join(opt1, opt2)
+            return await self.run_join(context, opt1, opt2)
+
+        elif cmd == 'pb':
+            return await self.run_pb(context)
 
 
-    async def run_join(self, starting_wc=None, project_shortname=None):
+    async def run_pb(self, context):
+        """
+        Get the user's personal best for sprinting
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        record = user.get_record('wpm')
+
+        if record is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:pb:none', user.get_guild()))
+        else:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:pb', user.get_guild()).format(int(record)))
+
+
+    async def run_leave(self, context):
+        """
+        Leave the sprint
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint or the user is not joined to it, display an error
+        if not sprint.exists() or not sprint.is_user_sprinting(user.get_id()):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notjoined', user.get_guild()))
+
+        # Remove the user from the sprint
+        sprint.leave(user.get_id())
+
+        await context.send(user.get_mention() + ', ' + lib.get_string('sprint:leave', user.get_guild()))
+
+        # If there are now no users left, cancel the whole sprint
+        if len(sprint.get_users()) == 0:
+
+            # Cancel the sprint
+            sprint.cancel(context)
+
+            # Decrement sprints_started stat for whoever started this one
+            creator = User(sprint.createdby, sprint.guild)
+            creator.add_stat('sprints_started', -1)
+
+            # Display a message letting users know
+            return await context.send( lib.get_string('sprint:leave:cancelled', user.get_guild()) )
+
+
+    async def run_join(self, context, starting_wc=None, project_shortname=None):
         """
         Join the sprint, with an optional starting word count and project shortname
         :param starting_wc:
         :param project_shortname:
         :return:
         """
-        # user = User(context.message.author.id, context.guild.id, context)
-        # sprint = Sprint(user.get_guild())
-        #
-        # # If there is no active sprint, then just display an error
-        # if not sprint.exists():
-        #     return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
-        #
-        # starting_wc = lib.is_number(starting_wc)
-        # if starting_wc is False:
-        #     starting_wc = 0
-        #
-        # # If the user is already sprinting, then just update their starting wordcount
-        # if sprint.is_user_sprinting(user.get_id()):
-        #     sprint.
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        # Convert starting_wc to int if we can
+        starting_wc = lib.is_number(starting_wc)
+        if starting_wc is False:
+            starting_wc = 0
+
+        # If the user is already sprinting, then just update their starting wordcount
+        if sprint.is_user_sprinting(user.get_id()):
+
+            # Update the sprint_users record
+            sprint.update_user(user.get_id(), start=starting_wc)
+
+            # Send message back to channel letting them know their starting word count was updated
+            await context.send(user.get_mention() + ', ' + lib.get_string('sprint:join:update', user.get_guild()).format(starting_wc))
+
+        else:
+
+            # Join the sprint
+            sprint.join(user.get_id(), starting_wc)
+
+            # Send message back to channel letting them know their starting word count was updated
+            await context.send(user.get_mention() + ', ' + lib.get_string('sprint:join', user.get_guild()).format(starting_wc))
+
+        # TODO: Project stuff
+
 
 
 
@@ -201,7 +270,17 @@ class SprintCommand(commands.Cog, CommandWrapper):
         if sprint.createdby != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotcancel', user.get_guild()))
 
-        return await sprint.cancel(context)
+        # Get the users sprinting and create an array of mentions
+        users = sprint.get_users()
+        notify = sprint.get_notifications(users)
+
+        # Cancel the sprint
+        sprint.cancel(context)
+
+        # Display the cancellation message
+        message = lib.get_string('sprint:cancelled', user.get_guild())
+        message = message + ', '.join(notify)
+        return await context.send(message)
 
     async def run_start(self, context, length=None, start=None):
         """

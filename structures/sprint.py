@@ -85,8 +85,7 @@ class Sprint:
         :param int user_id:
         :return:
         """
-        users = self.get_users()
-        user_ids = [e['id'] for e in users]
+        user_ids = self.get_users()
         return user_id in user_ids
 
     def get_users(self):
@@ -95,7 +94,7 @@ class Sprint:
         :return:
         """
         users = self.__db.get_all('sprint_users', {'sprint': self.id})
-        return [row['user'] for row in users]
+        return [int(row['user']) for row in users]
 
     def get_notify_users(self):
         """
@@ -103,7 +102,7 @@ class Sprint:
         :return:
         """
         notify = self.__db.get_all('user_settings', {'guild': self.guild, 'setting': 'sprint_notify', 'value': 1})
-        notify_ids = [row['user'] for row in notify]
+        notify_ids = [int(row['user']) for row in notify]
 
         # We don't need to notify users who are already in the sprint, so we can exclude those
         users_ids = self.get_users()
@@ -135,18 +134,30 @@ class Sprint:
         :param starting_wc:
         :return: void
         """
+
+        # Get the current timestamp
         now = int(time.time())
+
+        # If the sprint hasn't started yet, set the user's start time to the sprint start time, so calculations will work correctly.
+        if not self.has_started():
+           now = self.start
+
+        # Insert the sprint_users record
         self.__db.insert('sprint_users', {'sprint': self.id, 'user': user_id, 'starting_wc': starting_wc, 'ending_wc': 0, 'timejoined': now})
 
-    async def cancel(self, context):
+    def leave(self, user_id):
+        """
+        Remove a user from the sprint
+        :param user_id:
+        :return:
+        """
+        self.__db.delete('sprint_users', {'sprint': self.id, 'user': user_id})
+
+    def cancel(self, context):
         """
         Cancel the sprint and notify the users who were taking part
         :return:
         """
-
-        # Get the users sprinting and create an array of mentions
-        users = self.get_users()
-        notify = self.get_notifications(users)
 
         # Load current user
         user = User(context.message.author.id, context.guild.id, context)
@@ -158,10 +169,6 @@ class Sprint:
         # If the user created this, decrement their created stat
         if user.get_id() == self.createdby:
             user.add_stat('sprints_started', -1)
-
-        message = lib.get_string('sprint:cancelled', user.get_guild())
-        message = message + ', '.join(notify)
-        return await context.send(message)
 
     async def post_start(self, context=None):
         """
@@ -207,6 +214,27 @@ class Sprint:
 
         # Print the message to the channel
         return await context.send(message)
+
+    def update_user(self, user_id, start=None, current=None, ending=None):
+
+        update = {}
+
+        if start is not None:
+            update['starting_wc'] = start
+
+        if current is not None:
+            update['current_wc'] = current
+
+        if ending is not None:
+            update['ending_wc'] = ending
+
+        # If the sprint hasn't started yet, set the user's start time to the sprint start time, so calculations will work correctly.
+        if not self.has_started():
+            update['timejoined'] = self.start
+
+        self.__db.update('sprint_users', update, {'sprint': self.id, 'user': user_id})
+
+
 
     def create(guild, channel, start, end, end_reference, length, createdby, created):
 

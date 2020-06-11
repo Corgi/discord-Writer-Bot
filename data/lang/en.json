@@ -211,6 +211,12 @@
     "sprint:timeleft": "{} minutes, {} seconds remaining.",
     "sprint:waitingforwc": "Waiting for final word counts. If the results haven't been posted after everyone has declared, try forcing the sprint to end with `sprint end`.",
     "sprint:notifications": "\n:bell: {}",
+    "sprint:leave": "You have abandoned the sprint",
+    "sprint:leave:cancelled": "**Sprint has been cancelled**\nEverybody left and I'm not doing this alone.",
+    "sprint:join:update": "Your starting word count has been set to {}.",
+    "sprint:join": "You have joined the sprint with {} words.",
+    "sprint:pb": "Your personal best is **{}** wpm.",
+    "sprint:pb:none": "You do not yet have a wpm personal best. Get sprinting, if you want one!",
 
     "sprint:err:cmd": "Invalid sprint command... Run `!help sprint` for more information on the sprint command.",
     "sprint:err:alreadyexists": "There is already a sprint running on this server. Please wait until it has finished before creating a new one.",
@@ -218,7 +224,7 @@
     "sprint:err:cannotcancel": "Only the sprint creator or the server admin can cancel this sprint",
     "sprint:err:unknown": "",
     "sprint:err:for:unknown": "Sorry, I don't understand that - the correct format should be: `sprint for 20 in 5` or `sprint for 30 now`",
-
+    "sprint:err:notjoined": "You are not taking part in a sprint at the moment",
 
     "a": "a",
     "user": "User",

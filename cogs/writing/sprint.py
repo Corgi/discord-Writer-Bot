@@ -9,13 +9,12 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
     DEFAULT_LENGTH = 20 # 20 minutes
     DEFAULT_DELAY = 2 # 2 minutes
-    DEFAULT_POST_DELAY = 2 # 2 minutes
     MAX_LENGTH = 60 # 1 hour
     MAX_DELAY = 60 * 24 # 24 hours
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'wc', 'help', 'pb', 'notify', 'forget', 'project', 'status']
+        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'wc', 'declare', 'help', 'pb', 'notify', 'forget', 'project', 'status']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -114,6 +113,125 @@ class SprintCommand(commands.Cog, CommandWrapper):
         elif cmd == 'pb':
             return await self.run_pb(context)
 
+        elif cmd == 'status':
+            return await self.run_status(context)
+
+        elif cmd == 'wc' or cmd == 'declare':
+            return await self.run_declare(context, opt1)
+
+
+    async def run_declare(self, context, amount=None):
+        """
+        Declare user's current word count for the sprint
+        :param context:
+        :param amount:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        # If the user is not sprinting, then again, just display that error
+        if not sprint.is_user_sprinting(user.get_id()):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notjoined', user.get_guild()))
+
+        # If the sprint hasn't started yet, display error
+        if not sprint.has_started():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notstarted', user.get_guild()))
+
+        # Did they enter something for the amount?
+        if amount is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:amount', user.get_guild()))
+
+        # Get the user's sprint info
+        user_sprint = sprint.get_user_sprint(user.get_id())
+
+        # Are they trying to do a calculation instead of declaring a number?
+        if amount[0] == '+' or amount[0] == '-':
+
+            # Set the calculation variable to True so we know later on that it was not a proper declaration
+            calculation = True
+
+            # Convert the amount string to an int
+            amount = int(amount)
+
+            # Add that to the current word count, to get the new value
+            new_amount = user_sprint['current_wc'] + amount
+
+        else:
+            calculation = False
+            new_amount = amount
+
+        # Make sure the amount is now a valid number
+        if not lib.is_number(new_amount):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:amount', user.get_guild()))
+
+        # Just make sure the new_amount is defintely an int
+        new_amount = int(new_amount)
+
+        # If the declared value is less than they started with and it is not a calculation, then that is an error.
+        if new_amount < int(user_sprint['starting_wc']) and not calculation:
+            diff = user_sprint['current_wc'] - new_amount
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:wclessthanstart', user.get_guild()).format(new_amount, user_sprint['starting_wc'], diff))
+
+        # Is the sprint finished? If so this will be an ending_wc declaration, not a current_wc one.
+        col = 'ending' if sprint.is_finished() else 'current'
+        arg = {col: new_amount}
+
+        # Update the user's sprint record
+        sprint.update_user(user.get_id(), **arg)
+
+        # Reload the user sprint info
+        user_sprint = sprint.get_user_sprint(user.get_id())
+
+        # Which value are we displaying?
+        wordcount = user_sprint['ending_wc'] if sprint.is_finished() else user_sprint['current_wc']
+        written = int(wordcount) - int(user_sprint['starting_wc'])
+
+        await context.send(user.get_mention() + ', ' + lib.get_string('sprint:declared', user.get_guild()).format(wordcount, written))
+
+        # Is the sprint now over and has everyone declared?
+        if sprint.is_finished() and sprint.is_declaration_finished():
+            await context.send(lib.get_string('sprint:resultscomingsoon', user.get_guild()))
+            await sprint.complete(context)
+
+    async def run_status(self, context):
+        """
+        Get the user's status in this sprint
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        # If the user is not sprinting, then again, just display that error
+        if not sprint.is_user_sprinting(user.get_id()):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notjoined', user.get_guild()))
+
+        # If the sprint hasn't started yet, display error
+        if not sprint.has_started():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notstarted', user.get_guild()))
+
+        # If they are sprinting, then display their current status.
+        user_sprint = sprint.get_user_sprint(user.get_id())
+
+        # Build the variables to be passed into the status string
+        now = int(time.time())
+        current = user_sprint['current_wc']
+        written = current - user_sprint['starting_wc']
+        seconds = now - user_sprint['timejoined']
+        elapsed = round(seconds / 60, 1)
+        wpm = Sprint.calculate_wpm(written, seconds)
+        left = round((sprint.end - now) / 60, 1)
+
+        return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:status', user.get_guild()).format(current, written, elapsed, wpm, left))
 
     async def run_pb(self, context):
         """
@@ -184,8 +302,9 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # If the user is already sprinting, then just update their starting wordcount
         if sprint.is_user_sprinting(user.get_id()):
 
-            # Update the sprint_users record
-            sprint.update_user(user.get_id(), start=starting_wc)
+            # Update the sprint_users record. We set their current_wc to the same as starting_wc here, otherwise if they join with, say 50 and their current remains 0
+            # then if they run a status, or in the ending calculations, it will say they wrote -50.
+            sprint.update_user(user.get_id(), start=starting_wc, current=starting_wc)
 
             # Send message back to channel letting them know their starting word count was updated
             await context.send(user.get_mention() + ', ' + lib.get_string('sprint:join:update', user.get_guild()).format(starting_wc))

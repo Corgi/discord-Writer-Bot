@@ -91,7 +91,8 @@ class User:
 
         # If the level now is higher than it was, print the level up message
         if user_xp['lvl'] > current_level:
-            await self.__context.send(lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']))
+            if self.__context is not None:
+                await self.__context.send(lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']))
 
         return result
 
@@ -290,6 +291,15 @@ class User:
     def delete_goal(self, type):
         return self.__db.delete('user_goals', {'user': self._id, 'type': type})
 
+    async def add_to_goals(self, amount):
+        """
+        Add word written to all goals the user is running
+        :param amount:
+        :return:
+        """
+        for goal in ['daily']:
+            await self.add_to_goal(goal, amount)
+
     async def add_to_goal(self, type, amount):
 
         user_goal = self.get_goal(type)
@@ -317,8 +327,5 @@ class User:
                 await self.add_xp(Experience.XP_COMPLETE_GOAL[type])
 
                 # Print message
-                await self.__context.send(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))
-
-
-        else:
-            return
+                if self.__context is not None:
+                    await self.__context.send(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))

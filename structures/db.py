@@ -128,6 +128,10 @@ class Database:
         self.__build_get(table, where, fields)
         return self.cursor.fetchall()
 
+    def get_all_sql(self, sql, params):
+        self.cursor.execute(sql, params)
+        return self.cursor.fetchall()
+
     def insert(self, table, params):
         self.__build_insert(table, params)
         return self.cursor.rowcount

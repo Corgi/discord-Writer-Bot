@@ -1,8 +1,14 @@
-import lib, numpy, time
+import lib, math, numpy, time
+from operator import itemgetter
 from structures.db import Database
+from structures.xp import Experience
 from structures.user import User
 
+from pprint import pprint
+
 class Sprint:
+
+    DEFAULT_POST_DELAY = 2 # 2 minutes
 
     def __init__(self, guild_id):
 
@@ -88,6 +94,22 @@ class Sprint:
         user_ids = self.get_users()
         return user_id in user_ids
 
+    def is_declaration_finished(self):
+        """
+        Check if everyone sprinting has declared their final word counts
+        :return: bool
+        """
+        results = self.__db.get_all_sql('SELECT * FROM sprint_users WHERE sprint = %s AND ending_wc = 0', [self.id])
+        return len(results) == 0
+
+    def get_user_sprint(self, user_id):
+        """
+        Get a sprint_users record for the given user on this sprint
+        :param user_id:
+        :return:
+        """
+        return self.__db.get('sprint_users', {'sprint': self.id, 'user': user_id})
+
     def get_users(self):
         """
         Get an array of all the sprint_users records for users taking part in this sprint
@@ -143,7 +165,7 @@ class Sprint:
            now = self.start
 
         # Insert the sprint_users record
-        self.__db.insert('sprint_users', {'sprint': self.id, 'user': user_id, 'starting_wc': starting_wc, 'ending_wc': 0, 'timejoined': now})
+        self.__db.insert('sprint_users', {'sprint': self.id, 'user': user_id, 'starting_wc': starting_wc, 'current_wc': starting_wc, 'ending_wc': 0, 'timejoined': now})
 
     def leave(self, user_id):
         """
@@ -180,7 +202,7 @@ class Sprint:
 
         # Build the message to display
         message = lib.get_string('sprint:started', guild_id).format(self.length)
-        message += ', '.join( self.get_notifications(self.get_users()) )
+        message += lib.get_string('sprint:joinednotifications', guild_id).format(', '.join( self.get_notifications(self.get_users()) ))
 
         # Add mentions for any user who wants to be notified
         notify = self.get_notify_users()
@@ -234,7 +256,147 @@ class Sprint:
 
         self.__db.update('sprint_users', update, {'sprint': self.id, 'user': user_id})
 
+    async def complete(self, context=None):
+        """
+        Finish the sprint, calculate all the WPM and XP and display results
+        :return:
+        """
+        now = int(time.time())
+        results = []
 
+        # If the sprint has already completed, stop.
+        if self.completed != 0:
+            return
+
+        # Mark this sprint as complete so the cron doesn't pick it up and start processing it again
+        # self.__db.update('sprints', {'completed': now}, {'id': self.id})
+
+        # Get all the users taking part
+        users = self.get_users()
+
+        # Loop through them and get their full sprint info
+        for user_id in users:
+
+            user = User(user_id, self.guild)
+            user_sprint = self.get_user_sprint(user_id)
+
+            # If they didn't submit an ending word count, use their current one
+            if user_sprint['ending_wc'] == 0:
+                user_sprint['ending_wc'] = user_sprint['current_wc']
+
+            # Now we only process their result if they have declared something and it's different to their starting word count
+            user_sprint['starting_wc'] = int(user_sprint['starting_wc'])
+            user_sprint['current_wc'] = int(user_sprint['current_wc'])
+            user_sprint['ending_wc'] = int(user_sprint['ending_wc'])
+            user_sprint['timejoined'] = int(user_sprint['timejoined'])
+
+            if user_sprint['ending_wc'] > 0 and user_sprint['ending_wc'] != user_sprint['starting_wc']:
+
+                wordcount = user_sprint['ending_wc'] - user_sprint['starting_wc']
+                time_sprinted = self.end_reference - user_sprint['timejoined']
+
+                # If for some reason the timejoined or sprint.end_reference are 0, then use the defined sprint length instead
+                if user_sprint['timejoined'] <= 0 or self.end_reference == 0:
+                    time_sprinted = self.length
+
+                # Calculate the WPM from their time sprinted
+                wpm = Sprint.calculate_wpm(wordcount, time_sprinted)
+
+                # See if it's a new record for the user
+                user_record = user.get_record('wpm')
+                wpm_record = True if user_record is None or wpm > int(user_record) else False
+
+                # If it is a record, update their record in the database
+                if wpm_record:
+                    user.update_record('wpm', wpm)
+
+                # Give them XP for finishing the sprint
+                await user.add_xp(Experience.XP_COMPLETE_SPRINT)
+
+                # Increment their stats
+                user.add_stat('sprints_completed', 1)
+                user.add_stat('sprints_words_written', wordcount)
+                user.add_stat('total_words_written', wordcount)
+
+                # Increment their words towards their goal
+                await user.add_to_goals(wordcount)
+
+                # TODO: Project
+
+                # TODO: Event
+
+                # Push user to results
+                results.append({
+                    'user': user,
+                    'wordcount': wordcount,
+                    'wpm': wpm,
+                    'wpm_record': wpm_record,
+                    'xp': Experience.XP_COMPLETE_SPRINT
+                })
+
+        # Sort the results
+        results = sorted(results, key=itemgetter('wordcount'), reverse=True)
+
+        # Now loop through them again and apply extra XP, depending on their position in the results
+        position = 1
+
+        for result in results:
+
+            # If the user finished in the top 5 and they weren't the only one sprinting, earn extra XP
+            if position <= 5 and len(results) > 1:
+
+                extra_xp = math.ceil(Experience.XP_WIN_SPRINT / position)
+                await result['user'].add_xp(extra_xp)
+
+            # If they actually won the sprint, increase their stat by 1
+            if position == 1:
+                result['user'].add_stat('sprints_won', 1)
+
+            position += 1
+
+        # Post the final message with the results
+        if len(results) > 0:
+
+            position = 1
+            message = lib.get_string('sprint:results:header', self.guild)
+            for result in results:
+
+                message = message + lib.get_string('sprint:results:row', self.guild).format(position, result['user'].get_mention(), result['wordcount'], result['wpm'], result['xp'])
+
+                # If it's a new PB, append that string as well
+                if result['wpm_record'] is True:
+                    message = message + lib.get_string('sprint:results:pb', self.guild)
+
+                position += 1
+
+        else:
+            message = lib.get_string('sprint:nowordcounts', self.guild)
+
+        # Send the message, either via the context or directly to the channel
+        await self.say(message, context)
+
+    async def say(self, message, context=None):
+        """
+        Send a message to the channel, via context if supplied, or direct otherwise
+        :param message:
+        :param context:
+        :return:
+        """
+        if context is not None:
+            return await context.send(message)
+        else:
+            # TODO
+            pass
+
+    def calculate_wpm(amount, seconds):
+        """
+        Calculate words per minute, from words written and seconds
+        :param amount:
+        :param seconds:
+        :return:
+        """
+        mins = seconds / 60
+        return int(amount / mins)
 
     def create(guild, channel, start, end, end_reference, length, createdby, created):
 

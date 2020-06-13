@@ -2,6 +2,7 @@ import discord, lib, time
 from discord.ext import commands
 from structures.generator import NameGenerator
 from structures.sprint import Sprint
+from structures.task import Task
 from structures.user import User
 from structures.wrapper import CommandWrapper
 
@@ -42,7 +43,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         """
         Write with your friends and see who can write the most in the time limit!
         When choosing a length and start delay, there are maximums of 60 minutes length of sprint, and 24 hours delay until sprint begins.
-        NOTE: The bot checks for sprint changes every 15 seconds, so your start/end times might be off by +-15 seconds or so.
+        NOTE: The bot checks for sprint changes every 30 seconds, so your start/end times might be off by +-30 seconds or so.
 
         Run `!help sprint` for more extra information, including any custom server settings related to sprints.
 
@@ -63,6 +64,10 @@ class SprintCommand(commands.Cog, CommandWrapper):
             !sprint forget - You will no longer be notified when someone starts a new sprint,
             !sprint status - Shows you your current word count on the sprint,
             !sprint help - Displays a similar help screen to this one, with a few added bits of info
+
+        **Sprint Tips**
+        If you join the sprint with a starting word count, remember to declare your total word count at the end, not just the amount of words you wrote in the sprint.
+        e.g. If you joined with 1000 words, and during the sprint you wrote another 500 words, the final word count you should declare would be 1500
         """
         user = User(context.message.author.id, context.guild.id, context)
 
@@ -119,6 +124,43 @@ class SprintCommand(commands.Cog, CommandWrapper):
         elif cmd == 'wc' or cmd == 'declare':
             return await self.run_declare(context, opt1)
 
+        elif cmd == 'end':
+            return await self.run_end(context)
+
+        elif cmd == 'help':
+            return await self.run_help(context)
+
+    async def run_help(self, context):
+        """
+        Display some similar help info to the main `help sprint` command, but with server settings displayed as well
+        :param context:
+        :return:
+        """
+
+
+    async def run_end(self, context):
+        """
+        Manually force the sprint to end (if the cron hasn't posted the message) and ask for final word counts
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
+
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        # If they do not have permission to cancel this sprint, display an error
+        if sprint.get_createdby() != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotend', user.get_guild()))
+
+        # Since we are forcing the end, we should cancel any pending tasks for this sprint
+        Task.cancel('sprint', sprint.get_id())
+
+        # We need to set the bot into the sprint object, as we will need it when trying to get the guild object
+        sprint.set_bot(self.bot)
+        return await sprint.end(context)
 
     async def run_declare(self, context, amount=None):
         """
@@ -195,7 +237,6 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
         # Is the sprint now over and has everyone declared?
         if sprint.is_finished() and sprint.is_declaration_finished():
-            await context.send(lib.get_string('sprint:resultscomingsoon', user.get_guild()))
             await sprint.complete(context)
 
     async def run_status(self, context):
@@ -273,7 +314,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
             sprint.cancel(context)
 
             # Decrement sprints_started stat for whoever started this one
-            creator = User(sprint.createdby, sprint.guild)
+            creator = User(sprint.get_createdby(), sprint.get_guild())
             creator.add_stat('sprints_started', -1)
 
             # Display a message letting users know
@@ -339,12 +380,12 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
         # If the sprint has not yet started, display the time until it starts
         if not sprint.has_started():
-            left = lib.secs_to_mins(sprint.start - now)
+            left = lib.secs_to_mins(sprint.get_start() - now)
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:startsin', user.get_guild()).format(left['m'], left['s']))
 
         # If it's currently still running, display how long is left
         elif not sprint.is_finished():
-            left = lib.secs_to_mins(sprint.end - now)
+            left = lib.secs_to_mins(sprint.get_end() - now)
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:timeleft', user.get_guild()).format(left['m'], left['s']))
 
         # If it's finished but not yet marked as completed, we must be waiting for word counts
@@ -386,7 +427,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
 
         # If they do not have permission to cancel this sprint, display an error
-        if sprint.createdby != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
+        if sprint.get_createdby() != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotcancel', user.get_guild()))
 
         # Get the users sprinting and create an array of mentions
@@ -415,7 +456,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Check if sprint is finished but not marked as completed, in which case we can mark it as complete
         if sprint.is_finished():
             # Mark the sprint as complete
-            sprint.complete()
+            await sprint.complete()
             # Reload the sprint object, as now there shouldn't be a pending one
             sprint = Sprint(user.get_guild())
 
@@ -453,10 +494,14 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
         # Are we starting immediately or after a delay?
         if start == 0:
-            # Immediately
+            # Immediately. That means we need to schedule the end task.
+            task = Task(sprint.TASKS['end'], end_time, 'sprint', sprint.get_id())
+            task.schedule()
             return await sprint.post_start(context)
         else:
-            # Delay
+            # Delay. That means we need to schedule the start task, which will in turn schedule the end task once it's run.
+            task = Task(sprint.TASKS['start'], start_time, 'sprint', sprint.get_id())
+            task.schedule()
             return await sprint.post_delayed_start(context)
 
 

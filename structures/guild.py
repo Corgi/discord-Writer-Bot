@@ -2,7 +2,6 @@ import lib
 from operator import itemgetter
 from structures.db import Database
 from structures.user import User
-from pprint import pprint
 
 class Guild:
 
@@ -85,3 +84,12 @@ class Guild:
             users.append( usr )
 
         return users
+
+    def get_from_bot(bot, guild_id):
+        """
+        Load the guild object from the bot.
+        This is used if we are in a cron, so we don't have a context we can get the guild object from
+        :return:
+        """
+        bot_guild = bot.get_guild(int(guild_id))
+        return Guild(bot_guild)

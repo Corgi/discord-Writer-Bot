@@ -1,6 +1,8 @@
 import lib, math, numpy, time
 from operator import itemgetter
 from structures.db import Database
+from structures.guild import Guild
+from structures.task import Task
 from structures.xp import Experience
 from structures.user import User
 
@@ -9,25 +11,29 @@ from pprint import pprint
 class Sprint:
 
     DEFAULT_POST_DELAY = 2 # 2 minutes
+    TASKS = {
+        'start': 'start',  # This is the task for starting the sprint, when it is scheduled with a start delay
+        'end': 'end', # This is the task for ending the writing phase of the sprint and asking for final word counts
+        'complete': 'complete' # This is the task for actually completing the sprint, calculating xp, posting final results, etc...
+    }
 
-    def __init__(self, guild_id):
+    def __init__(self, guild_id, bot=None):
 
-        # Initialise the database instance
+        # Initialise the database instance and bot (if supplied)
         self.__db = Database.instance()
-
-        self.bot = None
+        self.bot = bot
 
         # Initialise the variables to match the database record
-        self.id = None
-        self.guild = guild_id
-        self.channel = None
-        self.start = None
-        self.end = None
-        self.end_reference = None
-        self.length = None
-        self.createdby = None
-        self.created = None
-        self.completed = None
+        self._id = None
+        self._guild = guild_id
+        self._channel = None
+        self._start = None
+        self._end = None
+        self._end_reference = None
+        self._length = None
+        self._createdby = None
+        self._created = None
+        self._completed = None
 
         # Try and load the sprint on this server, if there is one running
         self.load()
@@ -37,28 +43,58 @@ class Sprint:
         Check if a sprint exists on this server
         :return:
         """
-        return self.id is not None
+        return self._id is not None
 
     def load(self):
         """
         Try to load the sprint out of the database for the given guild_id
         :return: bool
         """
-        result = self.__db.get('sprints', {'guild': self.guild, 'completed': 0})
+        result = self.__db.get('sprints', {'guild': self._guild, 'completed': 0})
         if result:
-            self.id = result['id']
-            self.guild = result['guild']
-            self.channel = result['channel']
-            self.start = result['start']
-            self.end = result['end']
-            self.end_reference = result['end_reference']
-            self.length = result['length']
-            self.createdby = result['createdby']
-            self.created = result['created']
-            self.completed = result['completed']
+            self._id = result['id']
+            self._guild = result['guild']
+            self._channel = result['channel']
+            self._start = result['start']
+            self._end = result['end']
+            self._end_reference = result['end_reference']
+            self._length = result['length']
+            self._createdby = result['createdby']
+            self._created = result['created']
+            self._completed = result['completed']
             return True
         else:
             return False
+
+    def get_id(self):
+        return self._id
+
+    def get_guild(self):
+        return self._guild
+
+    def get_channel(self):
+        return self._channel
+
+    def get_start(self):
+        return self._start
+
+    def get_end(self):
+        return self._end
+
+    def get_end_reference(self):
+        return self._end_reference
+
+    def get_length(self):
+        return self._length
+
+    def get_createdby(self):
+        return self._createdby
+
+    def get_created(self):
+        return self._created
+
+    def get_completed(self):
+        return self._completed
 
     def set_bot(self, bot):
         """
@@ -75,7 +111,7 @@ class Sprint:
         :return: bool
         """
         now = int(time.time())
-        return self.exists() and now > self.end
+        return self.exists() and now > self._end
 
     def has_started(self):
         """
@@ -83,7 +119,7 @@ class Sprint:
         :return:
         """
         now = int(time.time())
-        return self.start <= now
+        return self._start <= now
 
     def is_user_sprinting(self, user_id):
         """
@@ -99,7 +135,7 @@ class Sprint:
         Check if everyone sprinting has declared their final word counts
         :return: bool
         """
-        results = self.__db.get_all_sql('SELECT * FROM sprint_users WHERE sprint = %s AND ending_wc = 0', [self.id])
+        results = self.__db.get_all_sql('SELECT * FROM sprint_users WHERE sprint = %s AND ending_wc = 0', [self._id])
         return len(results) == 0
 
     def get_user_sprint(self, user_id):
@@ -108,14 +144,14 @@ class Sprint:
         :param user_id:
         :return:
         """
-        return self.__db.get('sprint_users', {'sprint': self.id, 'user': user_id})
+        return self.__db.get('sprint_users', {'sprint': self._id, 'user': user_id})
 
     def get_users(self):
         """
         Get an array of all the sprint_users records for users taking part in this sprint
         :return:
         """
-        users = self.__db.get_all('sprint_users', {'sprint': self.id})
+        users = self.__db.get_all('sprint_users', {'sprint': self._id})
         return [int(row['user']) for row in users]
 
     def get_notify_users(self):
@@ -123,7 +159,7 @@ class Sprint:
         Get an array of all the users who want to be notified about new sprints on this server
         :return:
         """
-        notify = self.__db.get_all('user_settings', {'guild': self.guild, 'setting': 'sprint_notify', 'value': 1})
+        notify = self.__db.get_all('user_settings', {'guild': self._guild, 'setting': 'sprint_notify', 'value': 1})
         notify_ids = [int(row['user']) for row in notify]
 
         # We don't need to notify users who are already in the sprint, so we can exclude those
@@ -137,17 +173,24 @@ class Sprint:
         """
         notify = []
         for user_id in users:
-            usr = User(user_id, self.guild)
+            usr = User(user_id, self._guild)
             notify.append(usr.get_mention())
         return notify
 
-    def complete(self):
+    def set_complete(self):
         """
-        Mark this sprint as completed
+        Mark this sprint as completed in the database and nothing else
         :return: void
         """
         now = int(time.time())
-        self.__db.update('sprints', {'completed': now}, {'id': self.id})
+        self.__db.update('sprints', {'completed': now}, {'id': self._id})
+
+    def set_ended(self):
+        """
+        Mark the 'end' column as 0 in the database, to force the sprint to end
+        :return: void
+        """
+        self.__db.update('sprints', {'end': 0}, {'id': self._id})
 
     def join(self, user_id, starting_wc=0):
         """
@@ -162,10 +205,10 @@ class Sprint:
 
         # If the sprint hasn't started yet, set the user's start time to the sprint start time, so calculations will work correctly.
         if not self.has_started():
-           now = self.start
+           now = self._start
 
         # Insert the sprint_users record
-        self.__db.insert('sprint_users', {'sprint': self.id, 'user': user_id, 'starting_wc': starting_wc, 'current_wc': starting_wc, 'ending_wc': 0, 'timejoined': now})
+        self.__db.insert('sprint_users', {'sprint': self._id, 'user': user_id, 'starting_wc': starting_wc, 'current_wc': starting_wc, 'ending_wc': 0, 'timejoined': now})
 
     def leave(self, user_id):
         """
@@ -173,7 +216,7 @@ class Sprint:
         :param user_id:
         :return:
         """
-        self.__db.delete('sprint_users', {'sprint': self.id, 'user': user_id})
+        self.__db.delete('sprint_users', {'sprint': self._id, 'user': user_id})
 
     def cancel(self, context):
         """
@@ -185,11 +228,14 @@ class Sprint:
         user = User(context.message.author.id, context.guild.id, context)
 
         # Delete sprints and sprint_users records
-        self.__db.delete('sprint_users', {'sprint': self.id})
-        self.__db.delete('sprints', {'id': self.id})
+        self.__db.delete('sprint_users', {'sprint': self._id})
+        self.__db.delete('sprints', {'id': self._id})
+
+        # Delete pending scheduled tasks
+        Task.cancel('sprint', self._id)
 
         # If the user created this, decrement their created stat
-        if user.get_id() == self.createdby:
+        if user.get_id() == self._createdby:
             user.add_stat('sprints_started', -1)
 
     async def post_start(self, context=None):
@@ -198,10 +244,10 @@ class Sprint:
         :param: context This is passed through when posting start immediately. Otherwise if its in a cron job, it will be None and we will use the bot object.
         :return:
         """
-        guild_id = context.guild.id if context is not None else self.guild
+        guild_id = context.guild.id if context is not None else self._guild
 
         # Build the message to display
-        message = lib.get_string('sprint:started', guild_id).format(self.length)
+        message = lib.get_string('sprint:started', guild_id).format(self._length)
         message += lib.get_string('sprint:joinednotifications', guild_id).format(', '.join( self.get_notifications(self.get_users()) ))
 
         # Add mentions for any user who wants to be notified
@@ -209,14 +255,7 @@ class Sprint:
         if notify:
             message += lib.get_string('sprint:notifications', guild_id).format( ', '.join(self.get_notifications(notify)) )
 
-        # If we passed the context through (ie. we are posting this message straight after the sprint start command) then we can use the context as normal
-        if context is not None:
-            return await context.send(message)
-
-        # If not, it must be from the cron as they asked for a delay and we need to use the bot object
-        else:
-            # TODO
-            pass
+        return await self.say(message, context)
 
 
     async def post_delayed_start(self, context):
@@ -226,8 +265,8 @@ class Sprint:
         """
         # Build the message to display
         now = int(time.time())
-        delay = lib.secs_to_mins((self.start + 2) - now) # Add 2 seconds in case its slow to post the message. Then it will display the higher minute instead of lower.
-        message = lib.get_string('sprint:scheduled', context.guild.id).format( delay['m'], self.length )
+        delay = lib.secs_to_mins((self._start + 2) - now) # Add 2 seconds in case its slow to post the message. Then it will display the higher minute instead of lower.
+        message = lib.get_string('sprint:scheduled', context.guild.id).format( delay['m'], self._length )
 
         # Add mentions for any user who wants to be notified
         notify = self.get_notify_users()
@@ -252,24 +291,28 @@ class Sprint:
 
         # If the sprint hasn't started yet, set the user's start time to the sprint start time, so calculations will work correctly.
         if not self.has_started():
-            update['timejoined'] = self.start
+            update['timejoined'] = self._start
 
-        self.__db.update('sprint_users', update, {'sprint': self.id, 'user': user_id})
+        self.__db.update('sprint_users', update, {'sprint': self._id, 'user': user_id})
 
     async def complete(self, context=None):
         """
         Finish the sprint, calculate all the WPM and XP and display results
         :return:
         """
-        now = int(time.time())
+
+        # Print the 'Results coming up shortly' message
+        await self.say(lib.get_string('sprint:resultscomingsoon', self._guild), context)
+
+        # Create array to use for storing the results
         results = []
 
         # If the sprint has already completed, stop.
-        if self.completed != 0:
+        if self._completed != 0:
             return
 
         # Mark this sprint as complete so the cron doesn't pick it up and start processing it again
-        # self.__db.update('sprints', {'completed': now}, {'id': self.id})
+        self.set_complete()
 
         # Get all the users taking part
         users = self.get_users()
@@ -277,7 +320,7 @@ class Sprint:
         # Loop through them and get their full sprint info
         for user_id in users:
 
-            user = User(user_id, self.guild)
+            user = User(user_id, self._guild)
             user_sprint = self.get_user_sprint(user_id)
 
             # If they didn't submit an ending word count, use their current one
@@ -293,11 +336,11 @@ class Sprint:
             if user_sprint['ending_wc'] > 0 and user_sprint['ending_wc'] != user_sprint['starting_wc']:
 
                 wordcount = user_sprint['ending_wc'] - user_sprint['starting_wc']
-                time_sprinted = self.end_reference - user_sprint['timejoined']
+                time_sprinted = self._end_reference - user_sprint['timejoined']
 
                 # If for some reason the timejoined or sprint.end_reference are 0, then use the defined sprint length instead
-                if user_sprint['timejoined'] <= 0 or self.end_reference == 0:
-                    time_sprinted = self.length
+                if user_sprint['timejoined'] <= 0 or self._end_reference == 0:
+                    time_sprinted = self._length
 
                 # Calculate the WPM from their time sprinted
                 wpm = Sprint.calculate_wpm(wordcount, time_sprinted)
@@ -346,6 +389,7 @@ class Sprint:
             if position <= 5 and len(results) > 1:
 
                 extra_xp = math.ceil(Experience.XP_WIN_SPRINT / position)
+                result['xp'] += extra_xp
                 await result['user'].add_xp(extra_xp)
 
             # If they actually won the sprint, increase their stat by 1
@@ -358,22 +402,55 @@ class Sprint:
         if len(results) > 0:
 
             position = 1
-            message = lib.get_string('sprint:results:header', self.guild)
+            message = lib.get_string('sprint:results:header', self._guild)
             for result in results:
 
-                message = message + lib.get_string('sprint:results:row', self.guild).format(position, result['user'].get_mention(), result['wordcount'], result['wpm'], result['xp'])
+                message = message + lib.get_string('sprint:results:row', self._guild).format(position, result['user'].get_mention(), result['wordcount'], result['wpm'], result['xp'])
 
                 # If it's a new PB, append that string as well
                 if result['wpm_record'] is True:
-                    message = message + lib.get_string('sprint:results:pb', self.guild)
+                    message = message + lib.get_string('sprint:results:pb', self._guild)
+
+                message = message + '\n'
 
                 position += 1
 
         else:
-            message = lib.get_string('sprint:nowordcounts', self.guild)
+            message = lib.get_string('sprint:nowordcounts', self._guild)
 
         # Send the message, either via the context or directly to the channel
         await self.say(message, context)
+
+    async def end(self, context=None):
+        """
+        Mark the 'end' time of the sprint as 0 in the database and ask for final word counts
+        :return:
+        """
+
+        # End the sprint in the database
+        self.set_ended()
+
+        # Get the sprinting users to notify
+        notify = self.get_notifications(self.get_users())
+
+        # Check for a guild setting for the delay time, otherwise use the default
+        guild = Guild.get_from_bot(self.bot, self._guild)
+        delay = guild.get_setting('sprint_delay_end')
+        if delay is None:
+            delay = self.DEFAULT_POST_DELAY
+
+        # Post the ending message
+        message = lib.get_string('sprint:end', self._guild).format(delay)
+        message = message + ', '.join(notify)
+        await self.say(message, context)
+
+        # Convert the minutes to seconds
+        delay *= 60
+        task_time = int(time.time()) + delay
+
+        # Schedule the cron task
+        task = Task(self.TASKS['complete'], task_time, 'sprint', self._id)
+        task.schedule()
 
     async def say(self, message, context=None):
         """
@@ -396,7 +473,7 @@ class Sprint:
         :return:
         """
         mins = seconds / 60
-        return int(amount / mins)
+        return round(amount / mins, 1)
 
     def create(guild, channel, start, end, end_reference, length, createdby, created):
 

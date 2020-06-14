@@ -1,5 +1,6 @@
 import lib, time
 from structures.db import Database
+from structures.project import Project
 from structures.xp import Experience
 
 class User:
@@ -329,3 +330,21 @@ class User:
                 # Print message
                 if self.__context is not None:
                     await self.__context.send(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))
+
+
+    def get_project(self, shortname):
+        """
+        Try and retrieve a project for this user, with the given shortname
+        :param shortname:
+        :return:
+        """
+        return Project.get(self._id, shortname)
+
+    def create_project(self, shortname, title):
+        """
+        Create a new project
+        :param shortname:
+        :param title:
+        :return:
+        """
+        return Project.create(self._id, shortname, title)

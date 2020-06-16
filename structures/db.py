@@ -46,13 +46,14 @@ class Database:
             self.connection.commit()
             return True
 
-    def __build_get(self, table, where=None, fields=['*']):
+    def __build_get(self, table, where=None, fields=['*'], sort=None):
 
         params = []
 
         sql = 'SELECT ' + ', '.join(fields) + ' ' \
               'FROM ' + table + ' '
 
+        # Did we specify some WHERE clauses?
         if where is not None:
 
             sql += 'WHERE '
@@ -63,6 +64,10 @@ class Database:
 
             # Remove the last 'AND '
             sql = sql[:-4]
+
+        # Did we specify some sorting?
+        if sort is not None:
+            sql += ' ORDER BY ' + ', '.join(sort)
 
         self.cursor.execute(sql, params)
 
@@ -124,8 +129,8 @@ class Database:
         self.__build_get(table, where, fields)
         return self.cursor.fetchone()
 
-    def get_all(self, table, where=None, fields=['*']):
-        self.__build_get(table, where, fields)
+    def get_all(self, table, where=None, fields=['*'], sort=None):
+        self.__build_get(table, where, fields, sort)
         return self.cursor.fetchall()
 
     def get_all_sql(self, sql, params):

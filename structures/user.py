@@ -340,6 +340,14 @@ class User:
         """
         return Project.get(self._id, shortname)
 
+    def get_projects(self):
+        """
+        Get all of the user's projects
+        :return:
+        """
+        return Project.all(self._id)
+
+
     def create_project(self, shortname, title):
         """
         Create a new project

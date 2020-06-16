@@ -1,4 +1,4 @@
-import discord, lib
+import discord, lib, math
 from discord.ext import commands
 from structures.user import User
 from structures.wrapper import CommandWrapper
@@ -7,7 +7,7 @@ class Project(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_commands = ['create', 'delete', 'rename', 'update', 'view', 'complete', 'restart']
+        self._supported_commands = ['create', 'delete', 'rename', 'update', 'view', 'complete', 'restart', 'finish', 'uncomplete', 'list']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -43,7 +43,7 @@ class Project(commands.Cog, CommandWrapper):
         cmd = args['cmd'].lower()
 
         # Make sure some options have been sent through
-        if len(opts) == 0:
+        if len(opts) == 0 and cmd != 'view' and cmd != 'list':
             return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:options', user.get_guild()))
 
         # Check which command is being run and run it.
@@ -52,6 +52,154 @@ class Project(commands.Cog, CommandWrapper):
             return await self.run_create(context, opts)
         elif cmd == 'delete':
             return await self.run_delete(context, opts)
+        elif cmd == 'rename':
+            return await self.run_rename(context, opts)
+        elif cmd == 'update':
+            return await self.run_update(context, opts)
+        elif cmd == 'view' or cmd == 'list':
+            return await self.run_view(context)
+        elif cmd == 'complete' or cmd == 'finish':
+            return await self.run_complete(context, opts)
+        elif cmd == 'restart' or cmd == 'uncomplete':
+            return await self.run_restart(context, opts)
+
+    async def run_restart(self, context, opts):
+        """
+        Mark a project as not completed
+        :param context:
+        :param opts:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        shortname = opts[0].lower()
+
+        # Make sure the project exists.
+        project = user.get_project(shortname)
+        if not project:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+        project.uncomplete()
+        return await context.send(user.get_mention() + ', ' + lib.get_string('project:uncompleted', user.get_guild()))
+
+    async def run_complete(self, context, opts):
+        """
+        Mark a project as completed
+        :param context:
+        :param opts:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        shortname = opts[0].lower()
+
+        # Make sure the project exists.
+        project = user.get_project(shortname)
+        if not project:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+        already_completed = project.is_completed()
+        project.complete()
+
+        # Was this the first time they completed it?
+        if already_completed == 0:
+
+            # Calculate how much XP to give them (1xp per 100 words). Min 10. Max 5000.
+            xp = math.ceil(project.get_words() / 100)
+            if xp < 10:
+                xp = 10
+            elif xp > 5000:
+                xp = 5000
+
+            # Give them the xp and print the message.
+            await user.add_xp(xp)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:completed', user.get_guild()).format(project.get_title(), xp))
+
+        else:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:recompleted', user.get_guild()))
+
+    async def run_view(self, context):
+        """
+        View a list of the user's projects
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        projects = user.get_projects()
+
+        # If they have no projects, then we can't display them.
+        if not projects:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:noprojects', user.get_guild()))
+
+        message = ''
+
+        for project in projects:
+
+            if project.is_completed():
+                message += ':sparkler: '
+
+            message += '**'+project.get_name()+'** ('+project.get_shortname()+')\n'
+            message += lib.get_string('wordcount', user.get_guild()) + ': ' + str(project.get_words()) + '\n\n'
+
+        return await context.send(user.get_mention() + ', ' + lib.get_string('project:list', user.get_guild()) + message)
+
+    async def run_update(self, context, opts):
+        """
+        Update a project's word count
+        :param context:
+        :param opts:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+
+        shortname = opts[0].lower()
+        amount = opts[1] if len(opts) > 1 else None
+
+        # Make sure the amount is valid.
+        amount = lib.is_number(amount)
+        if not amount:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:amount', user.get_guild()))
+
+        # Make sure the project exists.
+        project = user.get_project(shortname)
+        if not project:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+        # Is it already completed?
+        if project.is_completed():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:alreadycompleted', user.get_guild()).format(shortname))
+
+        # Update the word count.
+        project.update(amount)
+        return await context.send(user.get_mention() + ', ' + lib.get_string('project:updated', user.get_guild()).format(amount, project.get_name(), project.get_shortname()))
+
+    async def run_rename(self, context, opts):
+        """
+        Rename a project
+        :param context:
+        :param opts:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+
+        original_shortname = opts[0].lower()
+        new_shortname = opts[1].lower()
+        new_title = " ".join(opts[2:])
+
+        # Make sure the project exists
+        project = user.get_project(original_shortname)
+        if not project:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(original_shortname))
+
+        # Make sure they don't already have one with that new shortname.
+        project_with_new_shortname = user.get_project(new_shortname)
+        if project_with_new_shortname is not None and project_with_new_shortname.get_id() != project.get_id():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:exists', user.get_guild()).format(new_shortname))
+
+        # Get the original title.
+        original_title = project.get_name()
+
+        # Rename it.
+        project.rename(new_shortname, new_title)
+        return await context.send(user.get_mention() + ', ' + lib.get_string('project:renamed', user.get_guild()).format(original_title, original_shortname, new_title, new_shortname))
+
 
     async def run_delete(self, context, opts):
         """

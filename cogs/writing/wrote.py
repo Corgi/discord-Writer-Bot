@@ -1,6 +1,7 @@
 import discord, lib
 from discord.ext import commands
 from structures.db import Database
+from structures.project import Project
 from structures.user import User
 from structures.wrapper import CommandWrapper
 
@@ -41,23 +42,36 @@ class Wrote(commands.Cog, CommandWrapper):
             return
 
         amount = args['amount']
-        shortname = args['shortname'].lower() if shortname is not None else None
+        shortname = args['shortname']
+        message = None
 
-        # # Did they specify a Project shortname?
-        # # TODO
-        #
+        # If they were writing in a Project, update its word count.
+        if shortname is not None:
+
+            project = user.get_project(shortname.lower())
+
+            # Make sure the project exists.
+            if not project:
+                return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+            project.add_words(amount)
+            message = lib.get_string('wrote:addedtoproject', user.get_guild()).format(str(amount), project.get_title())
+
         # # Is there an Event running?
         # # TODO
-        #
-        # # Increment their words written statistic
+
+        # Increment their words written statistic
         user.add_stat('total_words_written', amount)
 
-        # # Update their words towards their daily goal
+        # Update their words towards their daily goal
         await user.add_to_goal('daily', amount)
 
         # Output message
-        total = user.get_stat('total_words_written')
-        return await context.send( user.get_mention() + ', ' + lib.get_string('wrote:added', user.get_guild()).format(str(amount), str(total)) )
+        if message is None:
+            total = user.get_stat('total_words_written')
+            message = lib.get_string('wrote:added', user.get_guild()).format(str(amount), str(total))
+
+        await context.send(user.get_mention() + ', ' + message)
 
 
 def setup(bot):

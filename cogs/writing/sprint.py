@@ -127,16 +127,35 @@ class SprintCommand(commands.Cog, CommandWrapper):
         elif cmd == 'end':
             return await self.run_end(context)
 
-        elif cmd == 'help':
-            return await self.run_help(context)
+        elif cmd == 'project':
+            return await self.run_project(context, opt1)
 
-    async def run_help(self, context):
+    async def run_project(self, context, shortname):
         """
-        Display some similar help info to the main `help sprint` command, but with server settings displayed as well
+        Set the project the user wants to sprint in.
         :param context:
+        :param shortname:
         :return:
         """
+        user = User(context.message.author.id, context.guild.id, context)
+        sprint = Sprint(user.get_guild())
 
+        # If there is no active sprint, then just display an error
+        if not sprint.exists():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
+
+        # If the user is not sprinting, then again, just display that error
+        if not sprint.is_user_sprinting(user.get_id()):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notjoined', user.get_guild()))
+
+        # Make sure the project exists.
+        shortname = shortname.lower() if shortname is not None else None
+        project = user.get_project(shortname)
+        if not project:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+        sprint.set_project(project.get_id(), user.get_id())
+        return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:project', user.get_guild()).format(project.get_title()))
 
     async def run_end(self, context):
         """
@@ -154,6 +173,10 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # If they do not have permission to cancel this sprint, display an error
         if sprint.get_createdby() != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotend', user.get_guild()))
+
+        # If the sprint hasn't started yet, it can't be ended.
+        if not sprint.has_started():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:notstarted', user.get_guild()))
 
         # Since we are forcing the end, we should cancel any pending tasks for this sprint
         Task.cancel('sprint', sprint.get_id())
@@ -270,7 +293,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         seconds = now - user_sprint['timejoined']
         elapsed = round(seconds / 60, 1)
         wpm = Sprint.calculate_wpm(written, seconds)
-        left = round((sprint.end - now) / 60, 1)
+        left = round((sprint.get_end() - now) / 60, 1)
 
         return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:status', user.get_guild()).format(current, written, elapsed, wpm, left))
 
@@ -321,11 +344,11 @@ class SprintCommand(commands.Cog, CommandWrapper):
             return await context.send( lib.get_string('sprint:leave:cancelled', user.get_guild()) )
 
 
-    async def run_join(self, context, starting_wc=None, project_shortname=None):
+    async def run_join(self, context, starting_wc=None, shortname=None):
         """
         Join the sprint, with an optional starting word count and project shortname
         :param starting_wc:
-        :param project_shortname:
+        :param shortname: Shortname of Project
         :return:
         """
         user = User(context.message.author.id, context.guild.id, context)
@@ -358,10 +381,19 @@ class SprintCommand(commands.Cog, CommandWrapper):
             # Send message back to channel letting them know their starting word count was updated
             await context.send(user.get_mention() + ', ' + lib.get_string('sprint:join', user.get_guild()).format(starting_wc))
 
-        # TODO: Project stuff
+        # If a project shortname is supplied, try to set that as what the user is sprinting for.
+        if shortname is not None:
 
+            # Convert to lowercase for searching.
+            shortname = shortname.lower()
 
+            # Make sure the project exists.
+            project = user.get_project(shortname)
+            if not project:
+                return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
 
+            sprint.set_project(project.get_id(), user.get_id())
+            return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:project', user.get_guild()).format(project.get_title()))
 
     async def run_time(self, context):
         """

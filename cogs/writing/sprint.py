@@ -260,6 +260,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
         # Is the sprint now over and has everyone declared?
         if sprint.is_finished() and sprint.is_declaration_finished():
+            Task.cancel('sprint', sprint.get_id())
             await sprint.complete(context)
 
     async def run_status(self, context):
@@ -527,13 +528,11 @@ class SprintCommand(commands.Cog, CommandWrapper):
         # Are we starting immediately or after a delay?
         if start == 0:
             # Immediately. That means we need to schedule the end task.
-            task = Task(sprint.TASKS['end'], end_time, 'sprint', sprint.get_id())
-            task.schedule()
+            Task.schedule(sprint.TASKS['end'], end_time, 'sprint', sprint.get_id())
             return await sprint.post_start(context)
         else:
             # Delay. That means we need to schedule the start task, which will in turn schedule the end task once it's run.
-            task = Task(sprint.TASKS['start'], start_time, 'sprint', sprint.get_id())
-            task.schedule()
+            Task.schedule(sprint.TASKS['start'], start_time, 'sprint', sprint.get_id())
             return await sprint.post_delayed_start(context)
 
 

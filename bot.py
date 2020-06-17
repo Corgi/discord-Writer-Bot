@@ -1,6 +1,10 @@
 import os, logging, datetime, time, lib
+from discord.ext import tasks
 from discord.ext.commands import AutoShardedBot
 from structures.db import *
+from structures.task import Task
+
+from pprint import pprint
 
 class WriterBot(AutoShardedBot):
 
@@ -14,6 +18,7 @@ class WriterBot(AutoShardedBot):
 
     async def on_ready(self):
         print('Logged on as', self.user)
+        self.scheduled_tasks.start()
 
     def load_commands(self):
         """
@@ -45,3 +50,16 @@ class WriterBot(AutoShardedBot):
         db.install()
         print('[DB] Database tables installed')
 
+    @tasks.loop(seconds=5.0)
+    async def scheduled_tasks(self):
+        """
+        Execute the scheduled tasks.
+        (I believe) this is going to happen for each shard, so if we have 5 shards for example, this loop will be running simultaneously on each of them.
+        :return:
+        """
+        print('['+str(self.shard_id)+'] Checking for scheduled tasks...')
+
+        # try:
+        await Task.execute_all(self)
+        # except Exception as e:
+        #     print('Exception: ' + str(e))

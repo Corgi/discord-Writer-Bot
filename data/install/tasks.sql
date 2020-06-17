@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS tasks (
     time BIGINT NOT NULL,
     type VARCHAR(255) NOT NULL,
     object VARCHAR(255) NOT NULL,
-    objectid INTEGER NOT NULL
+    objectid INTEGER NOT NULL,
+    processing INTEGER NOT NULL DEFAULT 0
 )

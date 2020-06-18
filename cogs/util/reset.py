@@ -6,8 +6,6 @@ from structures.wrapper import CommandWrapper
 
 class Reset(commands.Cog, CommandWrapper):
 
-
-
     def __init__(self, bot):
         self.bot = bot
         self._supported_resets = ['pb', 'wc', 'xp', 'all']
@@ -28,6 +26,7 @@ class Reset(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="reset")
+    @commands.guild_only()
     async def reset(self, context, what=None, confirm=None):
         """
         Lets you reset your statistics/records.

@@ -25,6 +25,7 @@ class Wrote(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="wrote")
+    @commands.guild_only()
     async def wrote(self, context, amount=None, shortname=None):
         """
         Adds to your total words written statistic.

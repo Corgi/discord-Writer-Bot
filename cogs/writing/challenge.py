@@ -22,6 +22,7 @@ class Challenge(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="challenge")
+    @commands.guild_only()
     async def ask(self, context, flag=''):
         """
         Generates a random writing challenge for you. e.g. "Write 400 words in 15 minutes".

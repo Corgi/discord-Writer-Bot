@@ -19,6 +19,7 @@ class Project(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="project")
+    @commands.guild_only()
     async def project(self, context, cmd=None, *opts):
         """
         The project command allows you to create different projects and store word counts against them separately. They also integrate with the `wrote` and `sprint` commands, allowing you to define words written against a chosen project. (See the help information for those commands for more info).

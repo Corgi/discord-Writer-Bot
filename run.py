@@ -8,7 +8,7 @@ from pprint import pprint
 config = lib.get('./settings.json')
 
 # Load the Bot object
-bot = WriterBot(command_prefix=config.prefix)
+bot = WriterBot(command_prefix=WriterBot.load_prefix)
 
 # Load all commands
 bot.load_commands()

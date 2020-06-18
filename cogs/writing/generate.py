@@ -26,6 +26,7 @@ class Generate(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="generate")
+    @commands.guild_only()
     async def generate(self, context, type=None, amount=None):
         """
         Random generator for various things (character names, place names, land names, book titles, story ideas, prompts).

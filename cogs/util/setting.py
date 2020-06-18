@@ -11,7 +11,7 @@ class Setting(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_settings = ['lang', 'sprint_delay_end']
+        self._supported_settings = ['lang', 'sprint_delay_end', 'prefix']
         self._arguments = [
             {
                 'key': 'setting',
@@ -29,6 +29,7 @@ class Setting(commands.Cog, CommandWrapper):
 
     @commands.command(name="setting")
     @commands.has_permissions(manage_guild=True)
+    @commands.guild_only()
     async def setting(self, context, setting=None, value=None):
         """
         Lets you update a setting for the server, if you have the permissions to manage_guild

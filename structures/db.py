@@ -99,7 +99,7 @@ class Database:
         # Execute the query
         self.cursor.execute(sql, sql_params)
 
-    def __build_update(self, table, params, where):
+    def __build_update(self, table, params, where=None):
 
         sql_params = []
         sql = 'UPDATE ' + table + ' SET '
@@ -113,14 +113,15 @@ class Database:
         sql = sql[:-2]
 
         # Where clauses
-        sql += ' WHERE '
+        if where is not None:
+            sql += ' WHERE '
 
-        for field, value in where.items():
-            sql += field + ' = %s AND '
-            sql_params.append(value)
+            for field, value in where.items():
+                sql += field + ' = %s AND '
+                sql_params.append(value)
 
-        # Remove the last 'AND '
-        sql = sql[:-4]
+            # Remove the last 'AND '
+            sql = sql[:-4]
 
         # Execute the query
         self.cursor.execute(sql, sql_params)
@@ -145,6 +146,9 @@ class Database:
         self.__build_delete(table, params)
         return self.cursor.rowcount
 
-    def update(self, table, params, where):
+    def update(self, table, params, where=None):
         self.__build_update(table, params, where)
         return self.cursor.rowcount
+
+    def execute(self, sql, params):
+        return self.cursor.execute(sql, params)

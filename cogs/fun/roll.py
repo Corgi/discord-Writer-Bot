@@ -12,6 +12,7 @@ class Roll(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def roll(self, context, roll='1d6'):
         """
         Rolls a dice between 1-6, or 1 and a specified number (max 100). Can also roll multiple dice at once (max 100) and get the total.

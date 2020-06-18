@@ -8,6 +8,7 @@ class Quote(commands.Cog):
         self.bot = bot
 
     @commands.command(name="quote")
+    @commands.guild_only()
     async def quote(self, context):
         """
         A random motivational quote to inspire you.

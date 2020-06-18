@@ -17,6 +17,7 @@ class EightBall(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="8ball")
+    @commands.guild_only()
     async def _8ball(self, context, question=None):
         """
         Ask the magic 8-ball a question. Your question will be routed to a text-processing AI in order to properly analyze the content of the question and provide a meaningful answer.
@@ -47,6 +48,16 @@ class EightBall(commands.Cog, CommandWrapper):
         # Send the message
         await context.send( context.message.author.mention + ', ' + format(answer) )
 
+    # @_8ball.error
+    # async def _8ball_error(self, context, error):
+    #     """
+    #
+    #     :param context:
+    #     :param error:
+    #     :return:
+    #     """
+    #     if not isinstance(error, discord.ext.commands.errors.NoPrivateMessage):
+    #         print(error)
 
 def setup(bot):
     bot.add_cog(EightBall(bot))

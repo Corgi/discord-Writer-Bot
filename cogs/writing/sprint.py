@@ -39,6 +39,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="sprint")
+    @commands.guild_only()
     async def sprint(self, context, cmd=None, opt1=None, opt2=None, opt3=None):
         """
         Write with your friends and see who can write the most in the time limit!

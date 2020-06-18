@@ -10,6 +10,7 @@ class XP(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def xp(self, context, who='me'):
         """
         Checks your Experience Points and Level. Use the 'top' flag to see the top 10 on this server.

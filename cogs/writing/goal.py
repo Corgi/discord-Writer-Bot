@@ -22,6 +22,7 @@ class Goal(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="goal")
+    @commands.guild_only()
     async def goal(self, context, option=None, value=None):
         """
         Sets a daily goal which resets every 24 hours at midnight in your timezone.

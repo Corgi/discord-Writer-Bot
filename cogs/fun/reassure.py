@@ -11,6 +11,7 @@ class Reassure(commands.Cog):
         self.bot = bot
 
     @commands.command(name="reassure")
+    @commands.guild_only()
     async def reassure(self, context, who=None):
         """
         Reassures you that everything will be okay.

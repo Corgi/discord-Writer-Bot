@@ -9,6 +9,7 @@ class Flip(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     async def flip(self, context):
         """
         Flips a coin

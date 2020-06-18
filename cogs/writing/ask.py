@@ -21,6 +21,7 @@ class Ask(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="ask")
+    @commands.guild_only()
     async def ask(self, context, type=None):
         """
         Asks you a random question about your character or your world, to get the creative juices flowing.

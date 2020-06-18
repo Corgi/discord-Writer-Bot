@@ -132,3 +132,11 @@ def debug(txt):
     :return:
     """
     print('[DEBUG] ' + str(txt))
+
+def error(txt):
+    """
+    Do something with a message for debugging purposes
+    :param txt:
+    :return:
+    """
+    print('[ERROR] ' + str(txt))

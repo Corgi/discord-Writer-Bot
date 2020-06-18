@@ -8,7 +8,8 @@ class About(commands.Cog):
         self.bot = bot
         self.__db = Database.instance()
 
-    @commands.command(pass_context=True, aliases=['info'])
+    @commands.command(aliases=['info'])
+    @commands.guild_only()
     async def about(self, context):
         """
         Displays information and statistics about the bot.

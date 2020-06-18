@@ -1,7 +1,9 @@
 import os, logging, datetime, time, lib
 from discord.ext import tasks
+from discord.ext import commands
 from discord.ext.commands import AutoShardedBot
 from structures.db import *
+from structures.guild import Guild
 from structures.task import Task
 
 from pprint import pprint
@@ -9,7 +11,8 @@ from pprint import pprint
 class WriterBot(AutoShardedBot):
 
     COMMAND_GROUPS = ['util', 'fun', 'writing']
-    SCHEDULED_TASK_LOOP = 5.0
+    SCHEDULED_TASK_LOOP = 15.0 # Seconds
+    CLEANUP_TASK_LOOP = 1.0 # Hours
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,6 +33,24 @@ class WriterBot(AutoShardedBot):
 
         # Start running the scheduled tasks.
         self.scheduled_tasks.start()
+        self.cleanup_tasks.start()
+
+    async def on_command_error(self, context, error):
+        """
+        Method to run if there is an exception thrown by a command
+        :param error:
+        :param context:
+        :return:
+        """
+
+        ignore = (commands.errors.CommandNotFound, commands.errors.UserInputError)
+
+        if isinstance(error, ignore):
+            return
+        elif isinstance(error, commands.errors.NoPrivateMessage):
+            return await context.author.send(f'{context.command} cannot be used in Private Messages')
+        else:
+            lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
 
     def load_commands(self):
         """
@@ -69,6 +90,9 @@ class WriterBot(AutoShardedBot):
         self.setup_recurring_tasks()
         print('[TASK] Recurring tasks inserted')
 
+        # Restart all tasks which are marked as processing, in case the bot dropped out during the process.
+        db.update('tasks', {'processing': 0})
+
     def setup_recurring_tasks(self):
         """
         Create the recurring tasks for the first time.
@@ -80,6 +104,29 @@ class WriterBot(AutoShardedBot):
         db.delete('tasks', {'object': 'goal', 'type': 'reset'})
         db.insert('tasks', {'object': 'goal', 'time': 0, 'type': 'reset', 'recurring': 1, 'runeveryseconds': 900})
 
+    @staticmethod
+    def load_prefix(bot, message):
+        """
+        Get the prefix to use for the guild
+        :param bot:
+        :param message:
+        :return:
+        """
+        db = Database.instance()
+        prefixes = {}
+        config = lib.get('./settings.json')
+
+        # Get the guild_settings for prefix and add to a dictionary, with the guild id as the key.
+        settings = db.get_all('guild_settings', {'setting': 'prefix'})
+        for setting in settings:
+            prefixes[int(setting['guild'])] = setting['value']
+
+        # If the guild id exists in this dictionary return that, otherwise return the default.
+        if message.guild is not None:
+            return prefixes.get(message.guild.id, config.prefix)
+        else:
+            return config.prefix
+
     @tasks.loop(seconds=SCHEDULED_TASK_LOOP)
     async def scheduled_tasks(self):
         """
@@ -89,7 +136,22 @@ class WriterBot(AutoShardedBot):
         """
         lib.debug('['+str(self.shard_id)+'] Checking for scheduled tasks...')
 
-        # try:
-        await Task.execute_all(self)
-        # except Exception as e:
-        #     print('Exception: ' + str(e))
+        try:
+            await Task.execute_all(self)
+        except Exception as e:
+            print('Exception: ' + str(e))
+
+    @tasks.loop(hours=CLEANUP_TASK_LOOP)
+    async def cleanup_tasks(self):
+        """
+        Clean up any old tasks which are still in the database and got stuck in processing
+        :return:
+        """
+        lib.debug('['+str(self.shard_id)+'] Running task cleanup...')
+
+        db = Database.instance()
+
+        hour_ago = int(time.time()) - (60*60)
+        lib.debug(str(hour_ago))
+        db.execute('DELETE FROM tasks WHERE processing = 1 AND time < %s', [hour_ago])
+

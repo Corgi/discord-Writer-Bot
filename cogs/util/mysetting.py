@@ -25,6 +25,7 @@ class MySetting(commands.Cog, CommandWrapper):
         ]
 
     @commands.command(name="mysetting")
+    @commands.guild_only()
     async def my_setting(self, context, setting=None, value=None):
         """
         Lets you update a setting for your user account.

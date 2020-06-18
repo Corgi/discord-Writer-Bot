@@ -87,9 +87,14 @@ class SprintCommand(commands.Cog, CommandWrapper):
             length = opt1
 
             # If the second option is invalid, display an error message
-            if opt2 is None or opt2.lower() not in ['now', 'in']:
+            if opt2 is not None and opt2.lower() not in ['now', 'in']:
                 return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:for:unknown', user.get_guild()))
 
+            # If they left off the last argument and just said `sprint for 20` then assume they mean now.
+            if opt2 is None:
+                opt2 = 'now'
+
+            # Get the delay they want before starting the sprint.
             if opt2.lower() == 'now':
                 delay = 0
             elif opt2.lower() == 'in':

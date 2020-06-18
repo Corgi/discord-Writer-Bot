@@ -356,7 +356,7 @@ class Sprint:
         # Loop through them and get their full sprint info
         for user_id in users:
 
-            user = User(user_id, self._guild)
+            user = User(user_id, self._guild, context=context, bot=bot, channel=self.get_channel())
             user_sprint = self.get_user_sprint(user_id)
 
             # If they didn't submit an ending word count, use their current one
@@ -487,7 +487,7 @@ class Sprint:
         await self.say(message, context, bot)
 
         # Convert the minutes to seconds
-        delay *= 60
+        delay = int(delay) * 60
         task_time = int(time.time()) + delay
 
         # Schedule the cron task
@@ -538,7 +538,7 @@ class Sprint:
             return True
 
         # Otherwise, run the end method. This will in turn schedule the complete task.
-        await self.end(None, bot)
+        await self.end(bot=bot)
         return True
 
     async def task_complete(self, bot) -> bool:
@@ -554,7 +554,7 @@ class Sprint:
             return True
 
         # Otherwise, run the complete method. This will in turn schedule the complete task.
-        await self.complete(None, bot)
+        await self.complete(bot=bot)
         return True
 
     def calculate_wpm(amount, seconds):

@@ -5,11 +5,13 @@ from structures.xp import Experience
 
 class User:
 
-    def __init__(self, id, guild, context=None, name=None):
+    def __init__(self, id, guild, context=None, name=None, bot=None, channel=None):
 
         # Initialise the database instance
         self.__db = Database.instance()
         self.__context = context
+        self.__bot = bot
+        self.__channel = channel
         self._id = int(id)
         self._guild = int(guild)
         self._name = name
@@ -92,8 +94,7 @@ class User:
 
         # If the level now is higher than it was, print the level up message
         if user_xp['lvl'] > current_level:
-            if self.__context is not None:
-                await self.__context.send(lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']))
+            await self.say(lib.get_string('levelup', self._guild).format(self.get_mention(), user_xp['lvl']))
 
         return result
 
@@ -328,8 +329,7 @@ class User:
                 await self.add_xp(Experience.XP_COMPLETE_GOAL[type])
 
                 # Print message
-                if self.__context is not None:
-                    await self.__context.send(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))
+                await self.say(lib.get_string('goal:met', self._guild).format(self.get_mention(), type, str(user_goal['goal']), str(Experience.XP_COMPLETE_GOAL[type])))
 
 
     def get_project(self, shortname):
@@ -356,3 +356,16 @@ class User:
         :return:
         """
         return Project.create(self._id, shortname, title)
+
+    async def say(self, message):
+        """
+        Send a message to the channel, via context if supplied, or direct otherwise
+        :param message:
+        :param context:
+        :return:
+        """
+        if self.__context is not None:
+            return await self.__context.send(message)
+        elif self.__bot is not None:
+            channel = self.__bot.get_channel(int(self.__channel))
+            return await channel.send(message)

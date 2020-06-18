@@ -65,6 +65,7 @@
     "info:members": "Members",
     "info:sprints": "Active Sprints",
     "info:helpserver": "Help Server",
+    "info:owner": "Owner",
     "info:dev": "Dev Info",
     "info:dev:branch": "Branch",
     "info:dev:change": "Latest change",

@@ -1,10 +1,12 @@
 import os, json, lib, discord, datetime, time
 from discord.ext import commands
+from structures.db import Database
 
 class About(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.__db = Database.instance()
 
     @commands.command(pass_context=True, aliases=['info'])
     async def about(self, context):
@@ -18,17 +20,19 @@ class About(commands.Cog):
         uptime = int(round(now - self.bot.start_time))
         guild_id = context.guild.id
         config = self.bot.config
+        sprints = self.__db.get('sprints', {'completed': 0}, ['COUNT(id) as cnt'])['cnt']
 
         # Begin the embedded message
         embed = discord.Embed(title=lib.get_string('info:bot', guild_id), color=3447003)
         embed.add_field(name=lib.get_string('info:version', guild_id), value=config.version, inline=True)
         embed.add_field(name=lib.get_string('info:uptime', guild_id), value=str(datetime.timedelta(seconds=uptime)), inline=True)
+        embed.add_field(name=lib.get_string('info:owner', guild_id), value=str(self.bot.app_info.owner), inline=True)
 
         # Statistics
         stats = []
         stats.append('• ' + lib.get_string('info:servers', guild_id) + ': ' + format(len(self.bot.guilds)))
         stats.append('• ' + lib.get_string('info:members', guild_id) + ': ' + format(self.count_members(self.bot.guilds)))
-        stats.append('• ' + lib.get_string('info:sprints', guild_id) + ': TODO')
+        stats.append('• ' + lib.get_string('info:sprints', guild_id) + ': ' + str(sprints))
         stats.append('• ' + lib.get_string('info:helpserver', guild_id) + ': https://discord.gg/FbmaegR')
         stats = '\n'.join(stats)
 

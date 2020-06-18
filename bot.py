@@ -15,16 +15,26 @@ class WriterBot(AutoShardedBot):
         super().__init__(*args, **kwargs)
         self.config = lib.get('./settings.json')
         self.start_time = time.time()
+        self.app_info = None
         self.setup()
 
     async def on_ready(self):
-        print('Logged on as', self.user)
+        """
+        Method run once the bot has logged in as is ready to be used.
+        :return:
+        """
+        lib.debug('Logged on as: ' + str(self.user))
+
+        # Retrieve app info.
+        self.app_info = await self.application_info()
+
+        # Start running the scheduled tasks.
         self.scheduled_tasks.start()
 
     def load_commands(self):
         """
         Load all the commands from the cogs/ directory.
-        @return: void
+        :return: void
         """
 
         # Find all the command groups in the cogs/ directory
@@ -50,9 +60,12 @@ class WriterBot(AutoShardedBot):
         Run the bot setup
         :return:
         """
+        # Install the database.
         db = Database.instance()
         db.install()
         print('[DB] Database tables installed')
+
+        # Setup the recurring tasks which need running.
         self.setup_recurring_tasks()
         print('[TASK] Recurring tasks inserted')
 

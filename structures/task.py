@@ -1,4 +1,4 @@
-import time
+import lib, time
 from structures.db import Database
 
 from pprint import pprint
@@ -21,6 +21,8 @@ class Task:
             self.object = record['object']
             self.object_id = record['objectid']
             self.processing = record['processing']
+            self.recurring = record['recurring']
+            self.run_every_seconds = record['runeveryseconds']
 
     def is_valid(self):
         """
@@ -28,6 +30,13 @@ class Task:
         :return:
         """
         return self.id is not None
+
+    def is_recurring(self):
+        """
+        Check if the task is a recurring one or not
+        :return:
+        """
+        return int(self.recurring) == 1
 
     def is_processing(self):
         """
@@ -68,24 +77,45 @@ class Task:
             sprint = Sprint.get(self.object_id)
             if sprint.is_valid():
                 method = 'task_' + str(self.type)
-                result = await getattr(sprint, method)(bot, self)
+                result = await getattr(sprint, method)(bot)
             else:
                 # If the sprint doesn't exist, then we can just delete this task.
                 result = True
+
+        elif self.object == 'goal':
+
+            from structures.goal import Goal
+
+            goal = Goal()
+            method = 'task_' + str(self.type)
+            result = await getattr(goal, method)(bot)
 
         else:
             # Invalid task object. May as well just delete this task.
             print('Invalid task object: ' + self.object)
             result = True
 
-        # The task might have to run several times, as there are multiple shards and the first one to run it might not be able to get_channel() on the channel id.
-        # So we only want to delete the task from the database if it explicitly returns True.
-        if result is True:
+        # If we finished the task, and it's not a recurring one, delete it.
+        if result is True and not self.is_recurring():
             self.delete()
         else:
             self.start_processing(0)
 
+        # If it's a recurring task, set its next run time.
+        if self.is_recurring():
+            self.set_recur()
+
         return result
+
+    def set_recur(self):
+        """
+        Set the next time this recurring task should be run
+        :return:
+        """
+        now = int(time.time())
+        next = now + int(self.run_every_seconds)
+        lib.debug('setting next run time for ' + str(self.id) + ' to: ' + str(next))
+        return self.__db.update('tasks', {'time': next}, {'id': self.id})
 
     def delete(self):
         """

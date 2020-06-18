@@ -124,3 +124,11 @@ def secs_to_mins(seconds):
         result['s'] = math.ceil( seconds % 60 )
 
     return result
+
+def debug(txt):
+    """
+    Do something with a message for debugging purposes
+    :param txt:
+    :return:
+    """
+    print('[DEBUG] ' + str(txt))

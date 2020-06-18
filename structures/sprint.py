@@ -506,7 +506,7 @@ class Sprint:
             channel = bot.get_channel(int(self.get_channel()))
             return await channel.send(message)
 
-    async def task_start(self, bot, task) -> bool:
+    async def task_start(self, bot) -> bool:
         """
         Scheduled task to start the sprint
         :param task:
@@ -525,7 +525,7 @@ class Sprint:
         Task.schedule(self.TASKS['end'], self._end, 'sprint', self._id)
         return True
 
-    async def task_end(self, bot, task) -> bool:
+    async def task_end(self, bot) -> bool:
         """
         Scheduled task to end the sprint and ask for final word counts.
         :param bot:
@@ -541,7 +541,7 @@ class Sprint:
         await self.end(None, bot)
         return True
 
-    async def task_complete(self, bot, task) -> bool:
+    async def task_complete(self, bot) -> bool:
         """
         Scheduled task to complete the sprint and post the results
         :param bot:

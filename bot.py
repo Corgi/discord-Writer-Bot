@@ -9,6 +9,7 @@ from pprint import pprint
 class WriterBot(AutoShardedBot):
 
     COMMAND_GROUPS = ['util', 'fun', 'writing']
+    SCHEDULED_TASK_LOOP = 5.0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,19 +46,35 @@ class WriterBot(AutoShardedBot):
                         print(e)
 
     def setup(self):
-
+        """
+        Run the bot setup
+        :return:
+        """
         db = Database.instance()
         db.install()
         print('[DB] Database tables installed')
+        self.setup_recurring_tasks()
+        print('[TASK] Recurring tasks inserted')
 
-    @tasks.loop(seconds=5.0)
+    def setup_recurring_tasks(self):
+        """
+        Create the recurring tasks for the first time.
+        :return:
+        """
+        db = Database.instance()
+
+        # Delete the recurring tasks in case they got stuck in processing, and then re-create them.
+        db.delete('tasks', {'object': 'goal', 'type': 'reset'})
+        db.insert('tasks', {'object': 'goal', 'time': 0, 'type': 'reset', 'recurring': 1, 'runeveryseconds': 900})
+
+    @tasks.loop(seconds=SCHEDULED_TASK_LOOP)
     async def scheduled_tasks(self):
         """
         Execute the scheduled tasks.
         (I believe) this is going to happen for each shard, so if we have 5 shards for example, this loop will be running simultaneously on each of them.
         :return:
         """
-        print('['+str(self.shard_id)+'] Checking for scheduled tasks...')
+        lib.debug('['+str(self.shard_id)+'] Checking for scheduled tasks...')
 
         # try:
         await Task.execute_all(self)

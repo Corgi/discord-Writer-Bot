@@ -184,14 +184,6 @@
     "wrote:argument:amount": "How many words did you write?",
     "wrote:err:type": "Amount of words must be a number",
 
-    "stats:words": "Words Written: ",
-    "stats:sprints": "Sprints Run: ",
-    "stats:sprintwords": "Words Written in Sprints: ",
-    "stats:dailygoals": "Daily Goals Completed: ",
-    "stats:challenges": "Challenges Completed: ",
-    "stats:projects": "Projects On-the-Go: ",
-    "stats:projectscompleted": "Projects Completed: ",
-
     "generate:argument:type": "What type of name do you want to generate?",
     "generate:argument:amount": "How many names do you want to generate?",
     "generate:err:type": "Invalid generator type",
@@ -234,6 +226,7 @@
     "sprint:results:pb": "          :champagne: **NEW PB**",
     "sprint:end": "**Time is up**\nPens down. Use `sprint wc <amount>` to submit your final word counts, you have {} minute(s).\n",
     "sprint:project": "You are now sprinting in your project **{}**.",
+    "sprint:stats": "Sprint Statistics",
 
     "sprint:err:cmd": "Invalid sprint command... Run `!help sprint` for more information on the sprint command.",
     "sprint:err:alreadyexists": "There is already a sprint running on this server. Please wait until it has finished before creating a new one.",
@@ -255,8 +248,6 @@
     "youare": "You are",
     "wordcount": "Word Count",
     "finalwordcount": "Finished Word Count",
-    "serverstats": "Overall Server Statistics",
-    "serverstats:info": "Currently this includes users who have left the guild. In the future this will exclude their results.",
     "req:timeout": "Request for response timed out"
 
 }

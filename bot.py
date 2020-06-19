@@ -42,13 +42,12 @@ class WriterBot(AutoShardedBot):
         :param context:
         :return:
         """
-
         ignore = (commands.errors.CommandNotFound, commands.errors.UserInputError)
 
         if isinstance(error, ignore):
             return
         elif isinstance(error, commands.errors.NoPrivateMessage):
-            return await context.author.send(f'{context.command} cannot be used in Private Messages')
+            return await context.author.send('Commands cannot be used in Private Messages.')
         else:
             lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
 
@@ -57,7 +56,6 @@ class WriterBot(AutoShardedBot):
         Load all the commands from the cogs/ directory.
         :return: void
         """
-
         # Find all the command groups in the cogs/ directory
         for dir in self.COMMAND_GROUPS:
 
@@ -147,11 +145,10 @@ class WriterBot(AutoShardedBot):
         Clean up any old tasks which are still in the database and got stuck in processing
         :return:
         """
-        lib.debug('['+str(self.shard_id)+'] Running task cleanup...')
-
         db = Database.instance()
 
+        lib.debug('['+str(self.shard_id)+'] Running task cleanup...')
+        
         hour_ago = int(time.time()) - (60*60)
-        lib.debug(str(hour_ago))
         db.execute('DELETE FROM tasks WHERE processing = 1 AND time < %s', [hour_ago])
 

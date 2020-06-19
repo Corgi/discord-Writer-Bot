@@ -34,7 +34,7 @@ class About(commands.Cog):
         stats.append('• ' + lib.get_string('info:servers', guild_id) + ': ' + format(len(self.bot.guilds)))
         stats.append('• ' + lib.get_string('info:members', guild_id) + ': ' + format(self.count_members(self.bot.guilds)))
         stats.append('• ' + lib.get_string('info:sprints', guild_id) + ': ' + str(sprints))
-        stats.append('• ' + lib.get_string('info:helpserver', guild_id) + ': https://discord.gg/FbmaegR')
+        stats.append('• ' + lib.get_string('info:helpserver', guild_id) + ': ' + config.help_server)
         stats = '\n'.join(stats)
 
         embed.add_field(name=lib.get_string('info:generalstats', guild_id), value=stats, inline=False)

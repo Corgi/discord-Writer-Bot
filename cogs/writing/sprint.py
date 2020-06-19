@@ -15,7 +15,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'wc', 'declare', 'help', 'pb', 'notify', 'forget', 'project', 'status']
+        self._supported_commands = ['start', 'for', 'time', 'cancel', 'end', 'join', 'leave', 'wc', 'declare', 'pb', 'notify', 'forget', 'project', 'status']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -46,25 +46,23 @@ class SprintCommand(commands.Cog, CommandWrapper):
         When choosing a length and start delay, there are maximums of 60 minutes length of sprint, and 24 hours delay until sprint begins.
         NOTE: The bot checks for sprint changes every 30 seconds, so your start/end times might be off by +-30 seconds or so.
 
-        Run `!help sprint` for more extra information, including any custom server settings related to sprints.
+        Run `help sprint` for more extra information, including any custom server settings related to sprints.
 
         Examples:
-            !sprint start - Quickstart a sprint with the default settings,
-            !sprint for 20 in 3 - Schedules a sprint for 20 minutes, to start in 3 minutes,
-            !sprint for 20 at :30 - Schedules a sprint for 20 minutes, starting the next time it is half past the current hour (UTC),
-            !sprint cancel - Cancels the current sprint. This can only be done by the person who created the sprint, or any users with the MANAGE_MESSAGES permission,
-            !sprint join - Joins the current sprint,
-            !sprint join 100 - Joins the current sprint, with a starting word count of 100,
-            !sprint join 100 sword - Joins the current sprint, with a starting word count of 100 and sets your sprint to count towards your Project with the shortname "sword" (See: Projects for more info),
-            !sprint leave - Leaves the current sprint,
-            !sprint project sword - Sets your sprint to count towards your Project with the shortname "sword" (See: Projects for more info),
-            !sprint wc 250 - Declares your final word count at 250,
-            !sprint time - Displays the time left in the current sprint,
-            !sprint pb - Displays your personal best wpm from sprints on this server. Run sprint pb reset to reset your personal best to 0 on the current server,
-            !sprint notify - You will be notified when someone starts a new sprint,
-            !sprint forget - You will no longer be notified when someone starts a new sprint,
-            !sprint status - Shows you your current word count on the sprint,
-            !sprint help - Displays a similar help screen to this one, with a few added bits of info
+            `sprint start` - Quickstart a sprint with the default settings.
+            `sprint for 20 in 3` - Schedules a sprint for 20 minutes, to start in 3 minutes.
+            `sprint cancel` - Cancels the current sprint. This can only be done by the person who created the sprint, or any users with the MANAGE_MESSAGES permission.
+            `sprint join` - Joins the current sprint.
+            `sprint join 100` - Joins the current sprint, with a starting word count of 100.
+            `sprint join 100 sword` - Joins the current sprint, with a starting word count of 100 and sets your sprint to count towards your Project with the shortname "sword" (See: Projects for more info).
+            `sprint leave` - Leaves the current sprint.
+            `sprint project sword` - Sets your sprint to count towards your Project with the shortname "sword" (See: Projects for more info).
+            `sprint wc 250` - Declares your final word count at 250.
+            `sprint time` - Displays the time left in the current sprint.
+            `sprint pb` - Displays your personal best wpm from sprints on this server. Run sprint pb reset to reset your personal best to 0 on the current server.
+            `sprint notify` - You will be notified when someone starts a new sprint.
+            `sprint forget` - You will no longer be notified when someone starts a new sprint.
+            `sprint status` - Shows you your current word count on the sprint.
 
         **Sprint Tips**
         If you join the sprint with a starting word count, remember to declare your total word count at the end, not just the amount of words you wrote in the sprint.

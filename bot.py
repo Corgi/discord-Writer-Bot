@@ -5,6 +5,7 @@ from discord.ext.commands import AutoShardedBot
 from structures.db import *
 from structures.guild import Guild
 from structures.task import Task
+from structures.user import User
 
 from pprint import pprint
 
@@ -42,14 +43,19 @@ class WriterBot(AutoShardedBot):
         :param context:
         :return:
         """
+        user = User(context.message.author.id, context.guild.id, context)
+
         ignore = (commands.errors.CommandNotFound, commands.errors.UserInputError)
 
         if isinstance(error, ignore):
             return
         elif isinstance(error, commands.errors.NoPrivateMessage):
-            return await context.author.send('Commands cannot be used in Private Messages.')
+            return await context.send('Commands cannot be used in Private Messages.')
+        elif isinstance(error, commands.errors.MissingPermissions):
+            return await context.send(user.get_mention() + ', ' + str(error))
         else:
             lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
+            return await context.send(lib.get_string('err:unknown', user.get_guild()))
 
     def load_commands(self):
         """
@@ -148,7 +154,7 @@ class WriterBot(AutoShardedBot):
         db = Database.instance()
 
         lib.debug('['+str(self.shard_id)+'] Running task cleanup...')
-        
+
         hour_ago = int(time.time()) - (60*60)
         db.execute('DELETE FROM tasks WHERE processing = 1 AND time < %s', [hour_ago])
 

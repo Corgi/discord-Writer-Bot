@@ -32,6 +32,16 @@ class User:
     def get_mention(self):
         return f'<@{self._id}>'
 
+    def is_owner(self):
+        """
+        Check if this user is the bot owner
+        :return:
+        """
+        print(self.__bot.app_info.owner.id)
+        print(self._id)
+
+        return self.__bot is not None and self.__bot.app_info.owner.id == self._id
+
     def reset(self):
         """
         Reset the entire user's stats, records, xp, etc...

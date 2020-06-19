@@ -1,0 +1,25 @@
+{
+  "short": [
+    "Wait for bot to be logged in before trying to run any commands",
+    "Event command",
+    "Scripts to migrate data from old bot to new"
+  ],
+  "medium": [
+    "Admin command to change bot status message",
+    "Change goal reset time to be based on user's timezone",
+    "Implement logging system, to track errors",
+    "Get rid of current EC2 instance and get the next one up",
+    "Deploy new Writer-Bot once testing is okay"
+  ],
+  "long": [
+    "Setup docker image and pipeline deployment",
+    "Change roll command to allow for more DnD-like commands, like they have on Roll20",
+    "Frequently Asked Questions command",
+    "Setup Patreon or similar to allow donations to support development/hosting",
+    "Customisable commands - E.g. setup your own list of values to randomly choose from, setup your own random generators, etc..."
+  ],
+  "nice": [
+    "Have a think about possible 'Premium features' that could be offered for a small fee - Might be too complicated",
+    "Setup website for Writer-Bot where you can manage things and see stats, server status, etc..."
+  ]
+}

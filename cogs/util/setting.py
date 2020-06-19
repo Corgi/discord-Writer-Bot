@@ -45,7 +45,7 @@ class Setting(commands.Cog, CommandWrapper):
         # If we want to list the setting, do that instead.
         if setting is not None and setting.lower() == 'list':
             settings = guild.get_settings()
-            output = '```ini\n';
+            output = '```ini\n'
             if settings:
                 for setting, value in settings.items():
                     output += setting + '=' + str(value) + '\n'
@@ -65,15 +65,6 @@ class Setting(commands.Cog, CommandWrapper):
 
         guild.update_setting(setting, value)
         return await context.send(user.get_mention() + ', ' + lib.get_string('setting:updated', guild.get_id()).format(setting, value))
-
-    @setting.error
-    async def setting_error(self, context, error):
-        if isinstance(error, discord.ext.commands.errors.MissingPermissions):
-            return await context.send( context.message.author.mention + ', ' + str(error) )
-        else:
-            print(error)
-
-
 
 def setup(bot):
     bot.add_cog(Setting(bot))

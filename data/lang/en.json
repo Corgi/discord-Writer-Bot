@@ -2,12 +2,15 @@
 
     "err:nouser": "Error: Could not find that user",
     "err:validamount": "Error: Please enter a valid amount",
-    "err:unknown": "Error: Something went wrong",
+    "err:unknown": "Error: Something went wrong, please try again. (If this error persists, please post it on the Writer-Bot-Support server, with steps to replicate the error)",
     "err:cmdoptions": "Error: Invalid command options",
     "err:invalidsetting": "Error: Invalid setting",
     "err:replytime": "Error: You did not reply within %s seconds, so this command has been cancelled.",
     "err:what?": "Error: I'm not sure what you mean...",
     "err:permissions": "Error: You do not have the permissions to do that on this server.",
+
+    "admin:argument:cmd": "What are you trying to do?",
+    "admin:err:argument": "Invalid argument",
 
     "flip:heads": "It landed on heads!!",
     "flip:tails": "It landed on tails!!",
@@ -239,6 +242,12 @@
     "sprint:err:notstarted": "Sprint has not started yet",
     "sprint:err:amount": "Word count must be a valid number",
     "sprint:err:wclessthanstart": "Word count {} is less than the word count you started with ({})!\nIf you joined with a starting wordcount, make sure to declare your new TOTAL wordcount, not just the amount you wrote in this sprint.\nIf you really are trying to lower your word count for this sprint, please run: `sprint wc -{}` instead, to decrement your current wordcount.",
+
+    "todo": "ToDo List",
+    "todo:short": "Short-Term (Next things on the list)",
+    "todo:medium": "Medium-Term (Should happen in the near-ish future)",
+    "todo:long": "Long-Term (Should happen at some point)",
+    "todo:nice": "Nice-to-Have (Feature MIGHT be implemented if there is time)",
 
     "a": "a",
     "user": "User",

@@ -131,7 +131,8 @@ def debug(txt):
     :param txt:
     :return:
     """
-    print('[DEBUG] ' + str(txt))
+    time = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    print('['+str(time)+'][DEBUG] ' + str(txt))
 
 def error(txt):
     """

@@ -2,7 +2,8 @@
   "short": [
     "Wait for bot to be logged in before trying to run any commands",
     "Event command",
-    "Scripts to migrate data from old bot to new"
+    "Scripts to migrate data from old bot to new",
+    "Get rid of default !help command and write a new one"
   ],
   "medium": [
     "Change goal reset time to be based on user's timezone",

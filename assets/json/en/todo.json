@@ -5,7 +5,6 @@
     "Scripts to migrate data from old bot to new"
   ],
   "medium": [
-    "Admin command to change bot status message",
     "Change goal reset time to be based on user's timezone",
     "Implement logging system, to track errors",
     "Get rid of current EC2 instance and get the next one up",

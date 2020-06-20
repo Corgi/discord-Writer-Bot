@@ -175,7 +175,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
 
         # If they do not have permission to cancel this sprint, display an error
-        if sprint.get_createdby() != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
+        if int(sprint.get_createdby()) != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotend', user.get_guild()))
 
         # If the sprint hasn't started yet, it can't be ended.
@@ -464,7 +464,7 @@ class SprintCommand(commands.Cog, CommandWrapper):
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:noexists', user.get_guild()))
 
         # If they do not have permission to cancel this sprint, display an error
-        if sprint.get_createdby() != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
+        if int(sprint.get_createdby()) != user.get_id() and context.message.author.permissions_in(context.message.channel).manage_messages is not True:
             return await context.send(user.get_mention() + ', ' + lib.get_string('sprint:err:cannotcancel', user.get_guild()))
 
         # Get the users sprinting and create an array of mentions

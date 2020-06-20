@@ -25,7 +25,7 @@ class Quote(commands.Cog):
         quote = quotes[random.randint(1, max)]
 
         # Send the message
-        await context.send( format(quote.quote + ' - *' + quote.name + '*') )
+        await context.send( format(quote['quote'] + ' - *' + quote['name'] + '*') )
 
 def setup(bot):
     bot.add_cog(Quote(bot))

@@ -12,7 +12,7 @@ from pprint import pprint
 class WriterBot(AutoShardedBot):
 
     COMMAND_GROUPS = ['util', 'fun', 'writing']
-    SCHEDULED_TASK_LOOP = 15.0 # Seconds
+    SCHEDULED_TASK_LOOP = 30.0 # Seconds
     CLEANUP_TASK_LOOP = 1.0 # Hours
 
     def __init__(self, *args, **kwargs):

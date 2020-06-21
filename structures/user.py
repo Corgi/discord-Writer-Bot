@@ -81,7 +81,7 @@ class User:
         if xp is not None:
             return lib.get_string('xp:info', self._guild).format(xp['lvl'], xp['xp'], (xp['xp'] + xp['next']))
         else:
-            return ''
+            return None
 
     def add_xp(self, amount):
 

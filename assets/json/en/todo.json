@@ -1,6 +1,5 @@
 {
   "short": [
-    "Profile command",
     "Wait for bot to be logged in before trying to run any commands",
     "Event command",
     "Scripts to migrate data from old bot to new",

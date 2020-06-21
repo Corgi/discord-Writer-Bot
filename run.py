@@ -8,7 +8,7 @@ from pprint import pprint
 config = lib.get('./settings.json')
 
 # Load the Bot object
-status = discord.Game( config.prefix + 'help' )
+status = discord.Game( 'Booting up...' )
 bot = WriterBot(command_prefix=WriterBot.load_prefix, activity=status)
 
 # Load all commands

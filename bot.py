@@ -1,4 +1,4 @@
-import os, logging, datetime, time, lib, traceback
+import os, logging, datetime, time, lib, traceback, discord
 from discord.ext import tasks
 from discord.ext import commands
 from discord.ext.commands import AutoShardedBot
@@ -22,12 +22,27 @@ class WriterBot(AutoShardedBot):
         self.app_info = None
         self.setup()
 
+    async def on_message(self, message):
+        """
+        Run any checks we need to, before processing the messages.
+        :param message:
+        :return:
+        """
+        # If the bot is not logged in yet, don't try to run any commands.
+        if not self.is_ready():
+            return
+
+        await self.process_commands(message)
+
     async def on_ready(self):
         """
         Method run once the bot has logged in as is ready to be used.
         :return:
         """
         lib.debug('Logged on as: ' + str(self.user))
+
+        # Show the help command on the status
+        await self.change_presence(activity=discord.Game(self.config.prefix + 'help'))
 
         # Retrieve app info.
         self.app_info = await self.application_info()

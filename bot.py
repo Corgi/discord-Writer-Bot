@@ -16,7 +16,7 @@ class WriterBot(AutoShardedBot):
     CLEANUP_TASK_LOOP = 1.0 # Hours
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(help_command=commands.DefaultHelpCommand(dm_help=True), *args, **kwargs)
         self.config = lib.get('./settings.json')
         self.start_time = time.time()
         self.app_info = None
@@ -58,7 +58,6 @@ class WriterBot(AutoShardedBot):
         :param context:
         :return:
         """
-        user = User(context.message.author.id, context.guild.id, context)
 
         ignore = (commands.errors.CommandNotFound, commands.errors.UserInputError)
 
@@ -67,10 +66,12 @@ class WriterBot(AutoShardedBot):
         elif isinstance(error, commands.errors.NoPrivateMessage):
             return await context.send('Commands cannot be used in Private Messages.')
         elif isinstance(error, commands.errors.MissingPermissions):
+            user = User(context.message.author.id, context.guild.id, context)
             return await context.send(user.get_mention() + ', ' + str(error))
         else:
             lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
             lib.error( traceback.format_exception(type(error), error, error.__traceback__) )
+            user = User(context.message.author.id, context.guild.id, context)
             return await context.send(lib.get_string('err:unknown', user.get_guild()))
 
     def load_commands(self):

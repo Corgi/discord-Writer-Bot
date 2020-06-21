@@ -23,9 +23,9 @@ class NameGenerator:
         if amount is None or amount < 1:
             amount = self.DEFAULT_AMOUNT
 
-        # If the type is 'idea' or 'prompt', change the amount to 1, as that will take up too much space.
-        if self.type == 'idea' or self.type == 'prompt':
-            amount = 1
+        # # If the type is 'idea' or 'prompt', change the amount to 1, as that will take up too much space.
+        # if self.type == 'idea' or self.type == 'prompt':
+        #     amount = 1
 
         asset_file = 'gen_' + self.type
         source = lib.get_asset(asset_file, self.context.guild.id)
@@ -91,7 +91,7 @@ class NameGenerator:
         # Sort the results alphabetically
         generated_names.sort()
 
-        # Uppercase the first letter of each word, if it's anything but idea generation
+        # Uppercase the first letter of each word, if it's anything but idea generation or prompt generatio
         if self.type != 'idea' and self.type != 'prompt':
             generated_names = map(lambda el : string.capwords(el), generated_names)
 

@@ -1,4 +1,4 @@
-import os, logging, datetime, time, lib, traceback, discord
+import os, datetime, time, lib, traceback, discord
 from discord.ext import tasks
 from discord.ext import commands
 from discord.ext.commands import AutoShardedBot

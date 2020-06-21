@@ -1,17 +1,16 @@
 {
   "short": [
-    "Wait for bot to be logged in before trying to run any commands",
     "Event command",
-    "Scripts to migrate data from old bot to new",
-    "Get rid of default !help command and write a new one"
+    "Get rid of default !help command and write a new one",
+    "Scripts to migrate data from old bot to new"
   ],
   "medium": [
-    "Change goal reset time to be based on user's timezone",
     "Implement logging system, to track errors",
     "Get rid of current EC2 instance and get the next one up",
     "Deploy new Writer-Bot once testing is okay"
   ],
   "long": [
+    "Change goal reset time to be based on user's timezone",
     "Setup docker image and pipeline deployment",
     "Change roll command to allow for more DnD-like commands, like they have on Roll20",
     "Frequently Asked Questions command",

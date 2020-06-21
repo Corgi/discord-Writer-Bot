@@ -16,6 +16,7 @@
     "Setup docker image and pipeline deployment",
     "Change roll command to allow for more DnD-like commands, like they have on Roll20",
     "Frequently Asked Questions command",
+    "Different types of goal: weekly, monthly, yearly",
     "Setup Patreon or similar to allow donations to support development/hosting",
     "Customisable commands - E.g. setup your own list of values to randomly choose from, setup your own random generators, etc..."
   ],

@@ -45,7 +45,7 @@
     "profile:sprintscompleted": "Sprints Completed" ,
     "profile:sprintswon": "Sprints Won" ,
     "profile:challengescompleted": "Challenges Completed" ,
-    "profile:goalscompleted": "Daily Goals Completed" ,
+    "profile:dailygoalscompleted": "Daily Goals Completed" ,
     "profile:goalprogress": "Daily Goal Progress" ,
 
     "roll:format": "Command must be in format #d# (e.g. 1d6 or 2d8)",

@@ -1,4 +1,4 @@
-import os, logging, datetime, time, lib
+import os, logging, datetime, time, lib, traceback
 from discord.ext import tasks
 from discord.ext import commands
 from discord.ext.commands import AutoShardedBot
@@ -55,6 +55,7 @@ class WriterBot(AutoShardedBot):
             return await context.send(user.get_mention() + ', ' + str(error))
         else:
             lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
+            lib.error( traceback.format_exception(type(error), error, error.__traceback__) )
             return await context.send(lib.get_string('err:unknown', user.get_guild()))
 
     def load_commands(self):

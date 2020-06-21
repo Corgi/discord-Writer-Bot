@@ -1,4 +1,4 @@
-import lib, time
+import lib, math, time
 from structures.db import Database
 from structures.project import Project
 from structures.xp import Experience
@@ -27,6 +27,15 @@ class User:
         return self._guild
 
     def get_name(self):
+        """
+        Try and get the user's name on the guild, or just return it if it was passed through.
+        :return:
+        """
+        if self._name is None and self.__context is not None and self.__context.guild is not None:
+            guild_member = self.__context.guild.get_member( self._id )
+            if guild_member is not None:
+                self._name = guild_member.display_name
+
         return self._name
 
     def get_mention(self):
@@ -37,9 +46,6 @@ class User:
         Check if this user is the bot owner
         :return:
         """
-        print(self.__bot.app_info.owner.id)
-        print(self._id)
-
         return self.__bot is not None and self.__bot.app_info.owner.id == self._id
 
     def reset(self):
@@ -289,7 +295,48 @@ class User:
         return lib.get_midnight_utc(timezone)
 
     def get_goal(self, type):
+        """
+        Get the user_goal record for this user and type
+        :param type:
+        :return:
+        """
         return self.__db.get('user_goals', {'user': self._id, 'type': type})
+
+    def get_goal_progress(self, type):
+        """
+        Get the user's goal progress
+        :param type:
+        :return:
+        """
+        progress = {
+            'percent': 0,
+            'done': 0,
+            'left': 0,
+            'goal': 0,
+            'current': 0,
+            'str': ''
+        }
+
+        user_goal = self.get_goal(type)
+        if user_goal is not None:
+
+            percent = math.floor((user_goal['current'] / user_goal['goal']) * 100)
+            progress['done'] = math.floor(percent / 10)
+            progress['left'] = 10 - progress['done']
+
+            progress['percent'] = percent
+            progress['goal'] = user_goal['goal']
+            progress['current'] = user_goal['current']
+            progress['str'] = '[' + ('-' * progress['done']) + ('  ' * progress['left']) + ']'
+
+        # Can't be more than 10 or less than 0
+        if progress['done'] > 10:
+            progress['done'] = 10
+
+        if progress['left'] < 0:
+            progress['left'] = 0
+
+        return progress
 
     def set_goal(self, type, value):
 

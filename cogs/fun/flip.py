@@ -12,7 +12,8 @@ class Flip(commands.Cog):
     @commands.guild_only()
     async def flip(self, context):
         """
-        Flips a coin
+        Flips a coin.
+
         Examples: !flip
         """
 

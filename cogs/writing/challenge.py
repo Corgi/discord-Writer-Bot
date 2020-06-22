@@ -18,12 +18,19 @@ class Challenge(commands.Cog, CommandWrapper):
         self._arguments = [
             {
                 'key': 'flag',
+                'prompt': 'challenge:argument:flag',
+                'required': True,
+                'error': 'challenge:argument:flag'
+            },
+            {
+                'key': 'flag2',
+                'required': False
             }
         ]
 
     @commands.command(name="challenge")
     @commands.guild_only()
-    async def ask(self, context, flag=''):
+    async def ask(self, context, flag=None, flag2=None):
         """
         Generates a random writing challenge for you. e.g. "Write 400 words in 15 minutes".
         You can add the flags "easy", "normal", "hard", "hardcore", or "insane" to choose a pre-set wpm,
@@ -33,27 +40,34 @@ class Challenge(commands.Cog, CommandWrapper):
         If you do not specify any flags with the command, the challenge will be completely random.
 
         Examples:
-            !challenge cancel - Cancels your current challenge,
-            !challenge done|complete - Completes your current challenge,
-
             !challenge - Generates an entirely random writing challenge,
-            !challenge easy - Generates a random writing challenge, at 5 wpm (20xp),
-            !challenge normal - Generates a random writing challenge, at 10 wpm (40xp),
-            !challenge hard - Generates a random writing challenge, at 20 wpm (75xp),
-            !challenge hardcore - Generates a random writing challenge, at 40 wpm (100xp),
-            !challenge insane - Generates a random writing challenge, at 60 wpm (150xp),
-            !challenge 10wpm - Generates a random writing challenge, at 10 wpm,
-            !challenge 15m - Generates a random writing challenge, with a duration of 15 minutes
+            !challenge easy - Generates a random writing challenge, at 5 wpm (20xp).
+            !challenge normal - Generates a random writing challenge, at 10 wpm (40xp).
+            !challenge hard - Generates a random writing challenge, at 20 wpm (75xp).
+            !challenge hardcore - Generates a random writing challenge, at 40 wpm (100xp).
+            !challenge insane - Generates a random writing challenge, at 60 wpm (150xp).
+            !challenge 10wpm - Generates a random writing challenge, at 10 wpm.
+            !challenge 15m - Generates a random writing challenge, with a duration of 15 minutes.
+            !challenge normal 18m - Generates a writing challenge, at normal difficulty, for 18 minutes.
+            !challenge cancel - Cancels your current challenge.
+            !challenge done|complete - Completes your current challenge.
         """
 
-        flag = flag.lower()
+        # Check the arguments are valid
+        args = await self.check_arguments(context, flag=flag, flag2=flag2)
+        if not args:
+            return
+
+        flag = args['flag'].lower()
+        if flag2 is not None:
+            flag2 = args['flag2'].lower()
 
         if flag == 'cancel':
             await self.run_cancel(context)
         elif flag == 'done' or flag == 'complete':
             await self.run_complete(context)
         else:
-            await self.run_challenge(context, flag)
+            await self.run_challenge(context, flag, flag2)
 
     def calculate_xp(self, wpm):
         """
@@ -111,7 +125,7 @@ class Challenge(commands.Cog, CommandWrapper):
 
         await context.send(f'{context.message.author.mention}, {output}')
 
-    async def run_challenge(self, context, flag):
+    async def run_challenge(self, context, flag, flag2=None):
 
         user = User(context.message.author.id, context.guild.id, context)
 
@@ -147,6 +161,11 @@ class Challenge(commands.Cog, CommandWrapper):
         elif flag.endswith('m'):
             # If it ends with 'm' remove that and convert to an int for the time
             time = int(re.sub(r'\D', '', flag))
+
+        # We can ask for a difficulty AND a time, using flag2. E.g. `normal 15m`. So if flag2 ends with 'm' calculate the time based on that.
+        # If for some reason they do both flags as time, e.g. `challenge 15m 25m` the second one will overwrite the first.
+        if flag2 is not None and flag2.endswith('m'):
+            time = int(re.sub(r'\D', '', flag2))
 
         goal = wpm * time
         xp = self.calculate_xp(wpm)

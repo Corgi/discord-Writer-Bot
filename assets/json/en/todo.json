@@ -1,8 +1,8 @@
 {
   "short": [
     "Event command",
-    "Get rid of default !help command and write a new one",
-    "Scripts to migrate data from old bot to new"
+    "Scripts to migrate data from old bot to new",
+    "Fix up help command text: remove tildes and prefixes for all command text"
   ],
   "medium": [
     "Implement logging system, to track errors",

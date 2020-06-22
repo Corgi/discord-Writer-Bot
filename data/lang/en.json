@@ -109,6 +109,7 @@
     "challenge:accepted": "You have accepted the challenge: ",
     "challenge:active": "Active Challenges",
     "challenge:noactiveserver": "There are no active challenges on this server.",
+    "challenge:argument:flag": "Please specify a difficulty, time or wpm when generating a challenge. See `help challenge` for more info.",
 
 
     "goal:status": "You are {} **{}%** of the way to your {} goal. ({}/{})",

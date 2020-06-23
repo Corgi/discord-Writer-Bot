@@ -24,7 +24,7 @@ class MySetting(commands.Cog, CommandWrapper):
             }
         ]
 
-    @commands.command(name="mysetting")
+    @commands.command(name="mysetting", aliases=['myset'])
     @commands.guild_only()
     async def my_setting(self, context, setting=None, value=None):
         """

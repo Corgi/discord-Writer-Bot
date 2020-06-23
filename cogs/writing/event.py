@@ -1,4 +1,5 @@
-import discord, lib, time
+import discord, lib, pytz, time
+from datetime import datetime, timezone
 from discord.ext import commands
 from structures.db import Database
 from structures.event import Event
@@ -10,10 +11,12 @@ from pprint import pprint
 
 class EventCommand(commands.Cog, CommandWrapper):
 
+    PROMPT_TIMEOUT = 60
+
     def __init__(self, bot):
         self.bot = bot
         self.__db = Database.instance()
-        self._supported_commands = ['create', 'rename', 'desc', 'description', 'img', 'image', 'delete', 'schedule', 'start', 'end', 'time', 'left', 'update', 'me', 'top', 'leaderboard', 'info']
+        self._supported_commands = ['create', 'rename', 'desc', 'description', 'img', 'image', 'delete', 'schedule', 'start', 'end', 'time', 'left', 'update', 'me', 'top', 'leaderboard', 'info', 'colour', 'color']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -48,6 +51,8 @@ class EventCommand(commands.Cog, CommandWrapper):
             return await self.run_set(context, 'description', opts)
         elif cmd == 'img' or cmd == 'image':
             return await self.run_set(context, 'image', opts)
+        elif cmd == 'colour' or cmd == 'color':
+            return await self.run_set(context, 'colour', opts)
         elif cmd == 'start':
             return await self.run_start(context)
         elif cmd == 'end':
@@ -58,33 +63,246 @@ class EventCommand(commands.Cog, CommandWrapper):
             return await self.run_update(context, opts)
         elif cmd == 'me':
             return await self.run_me(context)
+        elif cmd == 'schedule':
+            return await self.run_schedule(context)
         elif cmd == 'info':
             return await self.run_info(context)
 
-
         # schedule
+        # info
         # top
         # view
         # scheduled tasks
 
-    async def run_info(self, context):
+    async def run_schedule(self, context):
         """
-        Get the event information embedded message
+        Schedule the event to start and end at a specific datetime
         :param context:
         :return:
         """
         user = User(context.message.author.id, context.guild.id, context)
         event = Event.get_by_guild(user.get_guild())
 
+        # Do they have the permissions to rename an event?
+        self.check_permissions(context)
+
         # Make sure the event is running
-        if event is None or not event.is_running():
+        if event is None:
             return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
 
-        # embed = discord.Embed(title=user.get_name(), color=event.get_colour())
-        # embed.add_field(name=lib.get_string('profile:lvlxp', user.get_guild()), value=profile['lvlxp'], inline=True)
+        # Make sure the event is running
+        if event.is_running():
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:alreadyrunning', user.get_guild()))
 
-        # Send the message
-        return await context.send(embed=embed)
+        # Do they have a timezone set in their user settings?
+        user_timezone = user.get_setting('timezone')
+        if user_timezone is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:timezonenotset', user.get_guild()))
+
+        timezone = pytz.timezone(user_timezone)
+        time = datetime.now(timezone).strftime('%H:%M:%S')
+        offset = datetime.now(timezone).strftime('%z')
+
+        # Print the pre-schedule information to check their timezone is correct.
+        await context.send(user.get_mention() + ', ' + lib.get_string('event:preschedule', user.get_guild()).format(user_timezone, time, offset))
+
+        # We now have various stages to go through, so we loop through the stages, ask the question and store the user input as the answer.
+        answers = []
+
+        # Stage 1 - Start date
+        answer = await self.run_stage_one(context)
+        if not answer:
+            return
+        answers.append({'stage': 1, 'answer': answer})
+
+        # Stage 2 - Start time
+        answer = await self.run_stage_two(context)
+        if not answer:
+            return
+        answers.append({'stage': 2, 'answer': answer})
+
+        # Stage 3 - End date
+        answer = await self.run_stage_three(context)
+        if not answer:
+            return
+        answers.append({'stage': 3, 'answer': answer})
+
+        # Stage 4 - End time
+        answer = await self.run_stage_four(context)
+        if not answer:
+            return
+        answers.append({'stage': 4, 'answer': answer})
+
+        # Stage 5 - Confirmation
+        answer = await self.run_stage_five(context, answers)
+        if not answer:
+            return
+        answers.append({'stage': 5, 'answer': answer})
+
+
+
+        print(answers)
+        # print('BOT: ')
+        # print(datetime.now().strftime("%Y-%m-%d, %H:%M:%S"))
+        # print('USER: ')
+        # print(user_timezone)
+        # print(timezone)
+        # print(time)
+        # print(offset)
+
+    async def run_stage_one(self, context):
+        """
+        Ask the stage 1 question - Start date
+        :param context:
+        :return:
+        """
+        argument = {'prompt': lib.get_string('event:schedule:question:1', context.guild.id), 'check': lambda resp: lib.is_valid_datetime(resp, '%d-%m-%Y'), 'error': 'event:err:invaliddate'}
+        response = await self.prompt(context, argument, True, self.PROMPT_TIMEOUT)
+        if not response:
+            return False
+
+        response = response.content.lower()
+
+        # If there response was one of the exit commands, then stop.
+        if response in ('exit', 'quit', 'cancel'):
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response, context):
+            # If it didn't meet the check conditions, try again.
+            return await self.run_stage_one(context)
+
+        return response
+
+    async def run_stage_two(self, context):
+        """
+        Ask the stage 2 question - Start time
+        :param context:
+        :return:
+        """
+        argument = {'prompt': lib.get_string('event:schedule:question:2', context.guild.id), 'check': lambda resp: lib.is_valid_datetime(resp, '%H:%M'), 'error': 'event:err:invalidtime'}
+        response = await self.prompt(context, argument, True, self.PROMPT_TIMEOUT)
+        if not response:
+            return False
+
+        response = response.content.lower()
+
+        # If there response was one of the exit commands, then stop.
+        if response in ('exit', 'quit', 'cancel'):
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response, context):
+            # If it didn't meet the check conditions, try again.
+            return await self.run_stage_two(context)
+
+        return response
+
+    async def run_stage_three(self, context):
+        """
+        Ask the stage 3 question - End date
+        :param context:
+        :return:
+        """
+        argument = {'prompt': lib.get_string('event:schedule:question:3', context.guild.id), 'check': lambda resp: lib.is_valid_datetime(resp, '%d-%m-%Y'), 'error': 'event:err:invaliddate'}
+        response = await self.prompt(context, argument, True, self.PROMPT_TIMEOUT)
+        if not response:
+            return False
+
+        response = response.content.lower()
+
+        # If there response was one of the exit commands, then stop.
+        if response in ('exit', 'quit', 'cancel'):
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response, context):
+            # If it didn't meet the check conditions, try again.
+            return await self.run_stage_three(context)
+
+        return response
+
+    async def run_stage_four(self, context):
+        """
+        Ask the stage 4 question - End time
+        :param context:
+        :return:
+        """
+        argument = {'prompt': lib.get_string('event:schedule:question:4', context.guild.id), 'check': lambda resp: lib.is_valid_datetime(resp, '%H:%M'), 'error': 'event:err:invalidtime'}
+        response = await self.prompt(context, argument, True, self.PROMPT_TIMEOUT)
+        if not response:
+            return False
+
+        response = response.content.lower()
+
+        # If there response was one of the exit commands, then stop.
+        if response in ('exit', 'quit', 'cancel'):
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response, context):
+            # If it didn't meet the check conditions, try again.
+            return await self.run_stage_four(context)
+
+        return response
+
+    async def run_stage_five(self, context, answers):
+        """
+        Ask the stage 5 question - Confirmation
+        :param context:
+        :return:
+        """
+        prompt = lib.get_string('event:schedule:question:5', context.guild.id).format(lib.find(answers, 'stage', 1)['answer'],
+            lib.find(answers, 'stage', 2)['answer'], lib.find(answers, 'stage', 3)['answer'], lib.find(answers, 'stage', 4)['answer'])
+
+        argument = {'prompt': prompt, 'check': lambda resp: resp in ('yes', 'y', 'no', 'n'),
+                    'error': 'err:yesorno'}
+        response = await self.prompt(context, argument, True, self.PROMPT_TIMEOUT)
+        if not response:
+            return False
+
+        response = response.content.lower()
+
+        # If there response was one of the exit commands, then stop.
+        if response in ('exit', 'quit', 'cancel'):
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response, context):
+            # If it didn't meet the check conditions, try again.
+            return await self.run_stage_five(context)
+
+        # If they said no, tell them to start it again.
+        if response in ('no', 'n'):
+            await context.send(lib.get_string('event:schedule:restart', context.guild.id))
+            return False
+
+        return response in ('yes', 'y')
+
+    # async def run_info(self, context):
+    #     """
+    #     Get the event information embedded message
+    #     :param context:
+    #     :return:
+    #     """
+    #     user = User(context.message.author.id, context.guild.id, context)
+    #     event = Event.get_by_guild(user.get_guild())
+    #
+    #     # Make sure the event is running
+    #     if event is None or not event.is_running():
+    #         return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
+    #
+    #     # Work out which timezone to use when displaying the start and end dates.
+    #     start_date = lib.get_string('na', user.get_guild())
+    #     end_date = lib.get_string('na', user.get_guild())
+    #     timezone = 'UTC'
+    #
+    #
+    #     # embed = discord.Embed(title=user.get_name(), color=event.get_colour())
+    #     # embed.add_field(name=lib.get_string('profile:lvlxp', user.get_guild()), value=profile['lvlxp'], inline=True)
+    #
+    #     # Send the message
+    #     return await context.send(embed=embed)
 
     async def run_me(self, context):
         """
@@ -163,7 +381,7 @@ class EventCommand(commands.Cog, CommandWrapper):
         """
         user = User(context.message.author.id, context.guild.id, context)
 
-        # Do they have the permissions to rename an event?
+        # Do they have the permissions to end an event?
         self.check_permissions(context)
 
         event = Event.get_by_guild(user.get_guild())
@@ -181,7 +399,7 @@ class EventCommand(commands.Cog, CommandWrapper):
         """
         user = User(context.message.author.id, context.guild.id, context)
 
-        # Do they have the permissions to rename an event?
+        # Do they have the permissions to start an event?
         self.check_permissions(context)
 
         event = Event.get_by_guild(user.get_guild())
@@ -201,7 +419,7 @@ class EventCommand(commands.Cog, CommandWrapper):
         """
         user = User(context.message.author.id, context.guild.id, context)
 
-        # Do they have the permissions to rename an event?
+        # Do they have the permissions to set an event option?
         self.check_permissions(context)
 
         # Check if there is an event running
@@ -217,6 +435,8 @@ class EventCommand(commands.Cog, CommandWrapper):
             if len(value) > 255:
                 return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:img', user.get_guild()))
             event.set_image(value)
+        elif type == 'colour':
+            event.set_colour(value)
 
         # Save the changes
         event.save()

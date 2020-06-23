@@ -14,6 +14,7 @@ class Event:
         self.title = None
         self.description = None
         self.img = None
+        self.colour = 15105570 # Default colour to use if none specified
         self.startdate = None
         self.enddate = None
         self.started = None
@@ -27,6 +28,7 @@ class Event:
             self.title = record['title']
             self.description = record['description']
             self.img = record['img']
+            self.colour = record['colour']
             self.startdate = record['startdate']
             self.enddate = record['enddate']
             self.started = record['started']
@@ -114,8 +116,7 @@ class Event:
         Get the colour to use for the embedded messages for this event
         :return:
         """
-        # TODO: Changable setting
-        return 15105570
+        return self.colour
 
     def set_bot(self, bot):
         """
@@ -162,6 +163,15 @@ class Event:
         self.img = image
         return self
 
+    def set_colour(self, colour):
+        """
+        Set the colour to use
+        :param colour:
+        :return:
+        """
+        self.colour = colour
+        return self
+
     def set_started(self, time):
         """
         Set the started time
@@ -196,6 +206,7 @@ class Event:
             'title': self.title,
             'description': self.description,
             'img': self.img,
+            'colour': self.colour,
             'startdate': self.startdate,
             'enddate': self.enddate,
             'started': self.started,

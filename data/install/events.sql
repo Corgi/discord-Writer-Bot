@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS events (
     title VARCHAR(255) NOT NULL,
     description TEXT NULL,
     img VARCHAR(255) NULL,
+    colour VARCHAR(255) NULL DEFAULT '15105570',
     startdate BIGINT NULL,
     enddate BIGINT NULL,
     started INTEGER NOT NULL DEFAULT 0,

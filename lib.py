@@ -125,6 +125,35 @@ def secs_to_mins(seconds):
 
     return result
 
+def is_valid_datetime(value, format):
+    """
+    Check if a value is valid date in the specified format
+    :param value:
+    :param format:
+    :return:
+    """
+    try:
+        date = datetime.strptime(value, format)
+        return True
+    except ValueError:
+        return False
+
+def find(list, key, value):
+    """
+    Find a dictionary element by one of its values in a list
+    :param list:
+    :param key:
+    :param value:
+    :return:
+    """
+    index = False
+
+    for i, dic in enumerate(list):
+        if dic[key] == value:
+            index = i
+
+    return list[index] if index is not False else False
+
 def debug(txt):
     """
     Do something with a message for debugging purposes

@@ -1,7 +1,14 @@
-import lib, time
+import discord, lib, time
 from structures.db import Database
+from structures.user import User
 
 class Event:
+
+    LEADERBOARD_LIMIT = 10
+    TASKS = {
+        'start': 'start',  # This is the task for starting the event
+        'end': 'end',  # This is the task for ending the event
+    }
 
     def __init__(self, id):
         self.__db = Database.instance()
@@ -14,7 +21,7 @@ class Event:
         self.title = None
         self.description = None
         self.img = None
-        self.colour = 15105570 # Default colour to use if none specified
+        self.colour = None
         self.startdate = None
         self.enddate = None
         self.started = None
@@ -47,6 +54,13 @@ class Event:
         :return:
         """
         return self.is_valid() and self.get_started() > 0 and self.get_ended() == 0
+
+    def is_ended(self):
+        """
+        Check if the event has ended
+        :return:
+        """
+        return self.ended and self.ended > 0
 
     def is_scheduled(self):
         """
@@ -116,7 +130,21 @@ class Event:
         Get the colour to use for the embedded messages for this event
         :return:
         """
-        return self.colour
+        return int(self.colour)
+
+    def get_description(self):
+        """
+        Get the event description
+        :return:
+        """
+        return self.description
+
+    def get_image(self):
+        """
+        Get the image url
+        :return:
+        """
+        return self.img
 
     def set_bot(self, bot):
         """
@@ -143,6 +171,15 @@ class Event:
         :return:
         """
         self.title = title
+        return self
+
+    def set_channel(self, channel):
+        """
+        Set the channel ID
+        :param channel:
+        :return:
+        """
+        self.channel = channel
         return self
 
     def set_description(self, desc):
@@ -190,6 +227,24 @@ class Event:
         self.ended = time
         return self
 
+    def set_startdate(self, time):
+        """
+        Set the start timestamp
+        :param time:
+        :return:
+        """
+        self.startdate = time
+        return self
+
+    def set_enddate(self, time):
+        """
+        Set the start timestamp
+        :param time:
+        :return:
+        """
+        self.enddate = time
+        return self
+
     def delete(self):
         """
         Delete the event
@@ -204,6 +259,7 @@ class Event:
         """
         return self.__db.update('events', {
             'title': self.title,
+            'channel': self.channel,
             'description': self.description,
             'img': self.img,
             'colour': self.colour,
@@ -232,6 +288,7 @@ class Event:
         self.set_ended(now)
         self.save()
         await self.say( lib.get_string('event:ended', self.get_guild()).format(self.get_title()) )
+        await self.say(self.get_leaderboard(), embed=True)
 
     def get_wordcount(self, user_id):
         """
@@ -262,27 +319,168 @@ class Event:
                 'words': amount
             })
 
-    async def say(self, message):
+    async def say(self, message, embed=False):
         """
         Send a message, either from the context or directly from the bot, depending on how it was called
         :param message:
         :return:
         """
         if self.__context is not None:
-            return await self.__context.send(message)
+            if embed:
+                return await self.__context.send(embed=message)
+            else:
+                return await self.__context.send(message)
         elif self.__bot is not None:
             channel = self.__bot.get_channel(self.get_channel())
-            return await channel.send(message)
+            if embed:
+                return await channel.send(embed=message)
+            else:
+                return await channel.send(message)
+
+    def get_users(self, limit=None):
+        """
+        Get the users taking part in the event, ordered by words written descending
+        :return:
+        """
+        records = self.__db.get_all('user_events', {'event': self.id}, '*', ['words DESC'])
+        users = []
+        x = 1
+
+        for record in records:
+
+            users.append({
+                'user': record['user'],
+                'words': record['words']
+            })
+
+            x += 1
+
+            if limit is not None and x > limit:
+                break
+
+        return users
+
+    def get_total_wordcount(self):
+        """
+        Get the total word count in this event
+        :return:
+        """
+        record = self.__db.get('user_events', {'event': self.id}, ['SUM(words) as total'])
+        return int(record['total']) if record['total'] is not None else 0
+
+    def get_leaderboard(self, limit=None):
+        """
+        Build the embedded leaderboard to display
+        :return:
+        """
+
+        config = lib.get('./settings.json')
+        users = self.get_users()
+
+        # Build the embedded leaderboard message
+        title = self.get_title() + ' ' + lib.get_string('event:leaderboard', self.get_guild())
+        description = lib.get_string('event:leaderboard:desc', self.get_guild()).format(limit, self.get_title())
+        footer = lib.get_string('event:leaderboard:footer', self.get_guild()).format(limit)
+
+        # If there is no limit, don't show the footer
+        if limit is None:
+            footer = None
+
+        # If the event is not running, don't show the footer and adjust the description to take out 'so far'
+        if not self.is_running():
+            description = lib.get_string('event:leaderboard:desc:ended', self.get_guild()).format(self.get_title())
+            footer = None
+
+        image = self.get_image()
+        if not image or len(image) == 0:
+            image = config.avatar
+
+        embed = discord.Embed(title=title, color=self.get_colour(), description=description)
+        embed.set_thumbnail(url=image)
+        if footer:
+            embed.set_footer(text=footer, icon_url=config.avatar)
+
+        # Add headers
+        headers = [
+            lib.get_string('user', self.get_guild()),
+            lib.get_string('wordcount', self.get_guild())
+        ]
+
+        # Add users
+        position = 1
+
+        for user in users:
+
+            # Get the user and pass in the bot, so we can get their guild nickname
+            user_object = User(user['user'], self.get_guild(), context=self.__context, bot=self.__bot)
+
+            # Build the name and words variables to display in the list
+            name = str(position) + '. ' + user_object.get_name()
+            words = str(user['words'])
+
+            # Embed this user result as a field
+            embed.add_field(name=name, value=words, inline=False)
+
+            # Increment position
+            position += 1
+
+        return embed
+
+    async def task_start(self, bot):
+        """
+        Run the event starting task
+        :param bot:
+        :return:
+        """
+
+        # If the event is already running, we don't need to do this.
+        if self.is_running():
+            return True
+
+        # Beyond that, we don't do any checks. We have to assume that if the task is scheduled for this time, then so must the event start time be.
+
+        # Set the bot into the object
+        self.set_bot(bot)
+
+        # Otherwise, run the start method.
+        await self.start()
+        return True
+
+    async def task_end(self, bot):
+        """
+        Run the event ending task
+        :param bot:
+        :return:
+        """
+        # If the event is already running, we don't need to do this.
+        if self.is_ended():
+            return True
+
+        # Beyond that, we don't do any checks. We have to assume that if the task is scheduled for this time, then so must the event end time be.
+
+        # Set the bot into the object
+        self.set_bot(bot)
+
+        # Otherwise, run the start method.
+        await self.end()
+        return True
 
     @staticmethod
-    def get_by_guild(guild_id, ended=0):
+    def get_by_guild(guild_id, include_ended=False):
         """
         Get the event currently running on the specified guild
         :param guild_id:
+        :param ended:
         :return:
         """
         db = Database.instance()
-        record = db.get('events', {'guild': guild_id, 'ended': ended})
+
+        # If we are including ones which have ended, just try and get the last one
+        if include_ended:
+            record = db.get('events', {'guild': guild_id}, ['id'], ['id DESC'])
+        else:
+            record = db.get('events', {'guild': guild_id, 'ended': 0})
+
         if record:
             return Event(record['id'])
         else:

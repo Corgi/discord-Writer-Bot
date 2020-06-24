@@ -1,9 +1,10 @@
 import discord, lib, pytz, time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from discord.ext import commands
 from structures.db import Database
 from structures.event import Event
 from structures.project import Project
+from structures.task import Task
 from structures.user import User
 from structures.wrapper import CommandWrapper
 
@@ -16,7 +17,7 @@ class EventCommand(commands.Cog, CommandWrapper):
     def __init__(self, bot):
         self.bot = bot
         self.__db = Database.instance()
-        self._supported_commands = ['create', 'rename', 'desc', 'description', 'img', 'image', 'delete', 'schedule', 'start', 'end', 'time', 'left', 'update', 'me', 'top', 'leaderboard', 'info', 'colour', 'color']
+        self._supported_commands = ['create', 'rename', 'desc', 'description', 'img', 'image', 'delete', 'schedule', 'unschedule', 'start', 'end', 'time', 'left', 'update', 'me', 'top', 'leaderboard', 'info']
         self._arguments = [
             {
                 'key': 'cmd',
@@ -65,14 +66,61 @@ class EventCommand(commands.Cog, CommandWrapper):
             return await self.run_me(context)
         elif cmd == 'schedule':
             return await self.run_schedule(context)
+        elif cmd == 'unschedule':
+            return await self.run_unschedule(context)
         elif cmd == 'info':
             return await self.run_info(context)
+        elif cmd == 'top' or cmd == 'leaderboard':
+            return await self.run_top(context)
 
-        # schedule
-        # info
-        # top
-        # view
-        # scheduled tasks
+    async def run_top(self, context):
+        """
+        Get the leaderboard of words written for this event
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+
+        # First try and get the event as if its running
+        event = Event.get_by_guild(user.get_guild())
+
+        # If that fails, get the last run one
+        if event is None:
+            event = Event.get_by_guild(user.get_guild(), include_ended=True)
+
+        # If there is still not one, then just stop
+        if event is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
+
+        event.set_context(context)
+
+        return await context.send(embed=event.get_leaderboard(Event.LEADERBOARD_LIMIT))
+
+    async def run_unschedule(self, context):
+        """
+        Unschedule the event
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        event = Event.get_by_guild(user.get_guild())
+
+        # Do they have the permissions to rename an event?
+        self.check_permissions(context)
+
+        # Make sure the event is running
+        if event is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
+
+        # Unschedule the event
+        event.set_startdate(None)
+        event.set_enddate(None)
+        event.save()
+
+        # Remove any tasks we already had saved for this event.
+        Task.cancel('event', event.get_id())
+
+        return await context.send(user.get_mention() + ', ' + lib.get_string('event:unscheduled', user.get_guild()).format(event.get_title()))
 
     async def run_schedule(self, context):
         """
@@ -139,16 +187,55 @@ class EventCommand(commands.Cog, CommandWrapper):
             return
         answers.append({'stage': 5, 'answer': answer})
 
+        # Now run the checks to make sure the end date is later than start date, etc...
+        check = await self.check_answers(context, answers)
+        if not check:
+            return
+
+        # Now convert those start and end times to UTC timestamps
+        start = datetime.strptime(lib.find(answers, 'stage', 1)['answer'] + ' ' + lib.find(answers, 'stage', 2)['answer'], '%d-%m-%Y %H:%M')
+        end = datetime.strptime(lib.find(answers, 'stage', 3)['answer'] + ' ' + lib.find(answers, 'stage', 4)['answer'], '%d-%m-%Y %H:%M')
+
+        adjusted_start = int(timezone.localize(start).timestamp())
+        adjusted_end = int(timezone.localize(end).timestamp())
+
+        # Schedule the event with those timestamps
+        event.set_startdate(adjusted_start)
+        event.set_enddate(adjusted_end)
+        event.set_channel(context.message.channel.id)
+        event.save()
+
+        # Remove any tasks we already had saved for this event.
+        Task.cancel('event', event.get_id())
+
+        # Schedule the tasks to run at those times.
+        Task.schedule(Event.TASKS['start'], event.get_start_time(), 'event', event.get_id())
+        Task.schedule(Event.TASKS['end'], event.get_end_time(), 'event', event.get_id())
+
+        return await context.send(user.get_mention() + ', ' + lib.get_string('event:scheduled', user.get_guild()).format(event.get_title(), start, end))
 
 
-        print(answers)
-        # print('BOT: ')
-        # print(datetime.now().strftime("%Y-%m-%d, %H:%M:%S"))
-        # print('USER: ')
-        # print(user_timezone)
-        # print(timezone)
-        # print(time)
-        # print(offset)
+    async def check_answers(self, context, answers):
+        """
+        Run the checks on their answers to make sure their values are valid
+        :param answers:
+        :return:
+        """
+        now = datetime.today()
+        start = datetime.strptime(lib.find(answers, 'stage', 1)['answer'] + ' ' + lib.find(answers, 'stage', 2)['answer'], '%d-%m-%Y %H:%M')
+        end = datetime.strptime(lib.find(answers, 'stage', 3)['answer'] + ' ' + lib.find(answers, 'stage', 4)['answer'], '%d-%m-%Y %H:%M')
+
+        # Check that the end date is later than the start date.
+        if start > end:
+            await context.send( context.message.author.mention + ', ' + lib.get_string('event:err:dates', context.guild.id))
+            return False
+
+        # Check that dates are in the future
+        if start < now or end < now:
+            await context.send(context.message.author.mention + ', ' + lib.get_string('event:err:dates:past', context.guild.id))
+            return False
+
+        return True
 
     async def run_stage_one(self, context):
         """
@@ -252,8 +339,10 @@ class EventCommand(commands.Cog, CommandWrapper):
         :param context:
         :return:
         """
-        prompt = lib.get_string('event:schedule:question:5', context.guild.id).format(lib.find(answers, 'stage', 1)['answer'],
-            lib.find(answers, 'stage', 2)['answer'], lib.find(answers, 'stage', 3)['answer'], lib.find(answers, 'stage', 4)['answer'])
+        prompt = lib.get_string('event:schedule:question:5', context.guild.id).format(
+            lib.find(answers, 'stage', 1)['answer'] + ', ' + lib.find(answers, 'stage', 2)['answer'],
+            lib.find(answers, 'stage', 3)['answer'] + ', ' + lib.find(answers, 'stage', 4)['answer']
+        )
 
         argument = {'prompt': prompt, 'check': lambda resp: resp in ('yes', 'y', 'no', 'n'),
                     'error': 'err:yesorno'}
@@ -279,30 +368,68 @@ class EventCommand(commands.Cog, CommandWrapper):
 
         return response in ('yes', 'y')
 
-    # async def run_info(self, context):
-    #     """
-    #     Get the event information embedded message
-    #     :param context:
-    #     :return:
-    #     """
-    #     user = User(context.message.author.id, context.guild.id, context)
-    #     event = Event.get_by_guild(user.get_guild())
-    #
-    #     # Make sure the event is running
-    #     if event is None or not event.is_running():
-    #         return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
-    #
-    #     # Work out which timezone to use when displaying the start and end dates.
-    #     start_date = lib.get_string('na', user.get_guild())
-    #     end_date = lib.get_string('na', user.get_guild())
-    #     timezone = 'UTC'
-    #
-    #
-    #     # embed = discord.Embed(title=user.get_name(), color=event.get_colour())
-    #     # embed.add_field(name=lib.get_string('profile:lvlxp', user.get_guild()), value=profile['lvlxp'], inline=True)
-    #
-    #     # Send the message
-    #     return await context.send(embed=embed)
+    async def run_info(self, context):
+        """
+        Get the event information embedded message
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+        event = Event.get_by_guild(user.get_guild())
+        config = lib.get('./settings.json')
+
+        # Make sure there is an event
+        if event is None:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
+
+        # Work out which timezone to use when displaying the start and end dates.
+        start_date = lib.get_string('na', user.get_guild())
+        end_date = lib.get_string('na', user.get_guild())
+        user_timezone = user.get_setting('timezone')
+        if not user_timezone:
+            user_timezone = 'UTC'
+
+        timezone = pytz.timezone(user_timezone)
+
+        # Is it scheduled with start and end dates?
+        if event.is_scheduled():
+            start = datetime.fromtimestamp(event.get_start_time())
+            end = datetime.fromtimestamp(event.get_end_time())
+            start_date = start.astimezone(timezone).strftime('%d-%m-%Y %H:%M:%S') + ' ('+user_timezone+')'
+            end_date = end.astimezone(timezone).strftime('%d-%m-%Y %H:%M:%S') + ' ('+user_timezone+')'
+
+        # Get the running status
+        if event.is_running():
+            status = lib.get_string('event:started', user.get_guild())
+        else:
+            status = lib.get_string('event:notyetstarted', user.get_guild())
+
+        # Get the number of users in the event and how many words they have written in it so far
+        writers = len(event.get_users())
+        words = event.get_total_wordcount()
+
+        # Get the description of the event and add to the end of the status, or just display the status if the description is empty
+        description = event.get_description()
+        if description and len(description) > 0:
+            description = status + '\n\n' + description
+        else:
+            description = status
+
+        # Get the thumbnail image to use
+        image = event.get_image()
+        if not image or len(image) == 0:
+            image = config.avatar
+
+        # Build the embedded message.
+        embed = discord.Embed(title=event.get_title(), color=event.get_colour(), description=description)
+        embed.set_thumbnail(url=image)
+        embed.add_field(name=lib.get_string('event:startdate', user.get_guild()), value=start_date, inline=False)
+        embed.add_field(name=lib.get_string('event:enddate', user.get_guild()), value=end_date, inline=False)
+        embed.add_field(name=lib.get_string('event:numwriters', user.get_guild()), value=str(writers), inline=True)
+        embed.add_field(name=lib.get_string('event:numwords', user.get_guild()), value=str(words), inline=True)
+
+        # Send the message
+        return await context.send(embed=embed)
 
     async def run_me(self, context):
         """
@@ -357,8 +484,8 @@ class EventCommand(commands.Cog, CommandWrapper):
 
         # Is the event scheduled to start, but has not yet started?
         if not event.is_running() and event.is_scheduled():
-            left = lib.secs_to_mins(event.get_start_time() - now)
-            return await context.send(user.get_mention() + ', ' + lib.get_string('event:timetostart', user.get_guild()).format(left['m'], left['s']))
+            left = lib.secs_to_days(event.get_start_time() - now)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:timetostart', user.get_guild()).format(left))
 
         # If the event is not running and it is NOT scheduled, then we don't know what time it will start.
         elif not event.is_running():
@@ -366,8 +493,8 @@ class EventCommand(commands.Cog, CommandWrapper):
 
         # At this point, the event must be running. If it is scheduled, then we can get the time left from the end time. Otherwise, we don't know.
         elif event.is_scheduled():
-            left = lib.secs_to_mins(event.get_end_time() - now)
-            return await context.send(user.get_mention() + ', ' + lib.get_string('event:timeleft', user.get_guild()).format(left['m'], left['s']))
+            left = lib.secs_to_days(event.get_end_time() - now)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('event:timeleft', user.get_guild()).format(left))
 
         else:
             return await context.send(user.get_mention() + ', ' + lib.get_string('event:noendtime', user.get_guild()))
@@ -389,6 +516,10 @@ class EventCommand(commands.Cog, CommandWrapper):
             return await context.send(user.get_mention() + ', ' + lib.get_string('event:err:noexists', user.get_guild()))
 
         event.set_context(context)
+
+        # Remove any tasks we already had saved for this event.
+        Task.cancel('event', event.get_id())
+
         return await event.end()
 
     async def run_start(self, context):
@@ -499,8 +630,14 @@ class EventCommand(commands.Cog, CommandWrapper):
 
         # If they confirm, then delete the event.
         if response.lower() in ('y', 'yes'):
+
             event.delete()
+
+            # Remove any tasks we already had saved for this event.
+            Task.cancel('event', event.get_id())
+
             output = lib.get_string('event:deleted', user.get_guild()).format(event.get_title())
+
         else:
             # Otherwise, just print 'OK'
             output = 'OK'

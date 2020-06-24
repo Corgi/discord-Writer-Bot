@@ -126,8 +126,8 @@ class Database:
         # Execute the query
         self.cursor.execute(sql, sql_params)
 
-    def get(self, table, where=None, fields=['*']):
-        self.__build_get(table, where, fields)
+    def get(self, table, where=None, fields=['*'], sort=None):
+        self.__build_get(table, where, fields, sort)
         return self.cursor.fetchone()
 
     def get_all(self, table, where=None, fields=['*'], sort=None):

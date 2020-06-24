@@ -67,6 +67,10 @@ class Task:
         # Mark the task as processing so other shards don't pick it up.
         self.start_processing(1)
 
+        # Build a variable to store the method name to run
+        method = 'task_' + str(self.type)
+
+        # Start off with a False and see if we can successfully run and turn that to True
         result = False
 
         # Sprint tasks.
@@ -76,7 +80,6 @@ class Task:
 
             sprint = Sprint.get(self.object_id)
             if sprint.is_valid():
-                method = 'task_' + str(self.type)
                 result = await getattr(sprint, method)(bot)
             else:
                 # If the sprint doesn't exist, then we can just delete this task.
@@ -87,8 +90,18 @@ class Task:
             from structures.goal import Goal
 
             goal = Goal()
-            method = 'task_' + str(self.type)
             result = await getattr(goal, method)(bot)
+
+        elif self.object == 'event':
+
+            from structures.event import Event
+
+            event = Event(self.object_id)
+            if event.is_valid():
+                result = await getattr(event, method)(bot)
+            else:
+                # If the event doesn't exist, then we can just delete this task.
+                return True
 
         else:
             # Invalid task object. May as well just delete this task.

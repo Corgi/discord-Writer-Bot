@@ -125,6 +125,20 @@ def secs_to_mins(seconds):
 
     return result
 
+def secs_to_days(seconds, format="{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"):
+    """
+    Convert a number of seconds, into days, hours, minutes and seconds
+    E.g. 65 seconds -> 0 days, 1 minute 5 seconds
+    :param seconds:
+    :param format:
+    :return: dict
+    """
+    tdelta = timedelta(seconds=seconds)
+    d = {"days": tdelta.days}
+    d["hours"], rem = divmod(tdelta.seconds, 3600)
+    d["minutes"], d["seconds"] = divmod(rem, 60)
+    return format.format(**d)
+
 def is_valid_datetime(value, format):
     """
     Check if a value is valid date in the specified format

@@ -10,8 +10,9 @@
     "Deploy new Writer-Bot once testing is okay"
   ],
   "long": [
-    "Change goal reset time to be based on user's timezone",
     "Setup docker image and pipeline deployment",
+    "Change goal reset time to be based on user's timezone",
+    "Allow setting of different colour for event embedded message, from default orange",
     "Change roll command to allow for more DnD-like commands, like they have on Roll20",
     "Frequently Asked Questions command",
     "Different types of goal: weekly, monthly, yearly",

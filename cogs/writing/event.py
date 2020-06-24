@@ -32,7 +32,20 @@ class EventCommand(commands.Cog, CommandWrapper):
     @commands.guild_only()
     async def event(self, context, cmd=None, *opts):
         """
-        Work in progress. Do not use this command yet.
+        event create My Event Title - Create an event called "My Event Title" | Permissions required: [MANAGE_MESSAGES],
+        event rename My New Event Title - Rename event to "My New Event Title" | Permissions required: [MANAGE_MESSAGES],
+        event description This is the description - Set the description of the event to "This is the description" | Permissions required: [MANAGE_MESSAGES],
+        event image https://i.imgur.com/tJtAdNs.png - Set the thumbnail image for the event to the image URL specified | Permissions required: [MANAGE_MESSAGES],
+        event delete - Deletes the current event | Permissions required: [MANAGE_MESSAGES],
+        event schedule - Starts the event scheduling wizard. Please pay attention to the date/time formats, they must be entered exactly as the bot expects | Permissions required: [MANAGE_MESSAGES],
+        event unschedule - Removes the schedule from the event
+        event start - Manually starts the current event | Permissions required: [MANAGE_MESSAGES],
+        event end - Manually ends the current event | Permissions required: [MANAGE_MESSAGES],
+        event time - Checks how long until the event ends or starts,
+        event update 500 - Updates your event word count to 500 total words,
+        event me - Checks your current event word count,
+        event top - Checks the word count leaderboard for the current event
+        event info - Checks the information/status of the event
         """
         # Check the arguments were all supplied and get a dict list of them and their values, after any prompts
         args = await self.check_arguments(context, cmd=cmd)

@@ -27,6 +27,21 @@ def get_lang(guild_id):
     # TODO: Look up guild language in DB
     return 'en'
 
+def get_supported_languages():
+    """
+    Get an array of supported language packs the guilds can choose from
+    :return:
+    """
+    return ['en']
+
+def is_supported_language(lang):
+    """
+    Check if we support the specified language pack
+    :param lang:
+    :return:
+    """
+    return lang in get_supported_languages()
+
 def get_string(str, guild_id):
     """
     Load a language string

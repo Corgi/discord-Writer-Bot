@@ -89,6 +89,8 @@
     "setting:argument:setting": "What setting do you want to update?",
     "setting:argument:value": "What value do you want to set for this setting?",
     "setting:none": "No settings found",
+    "setting:err:sprint_delay_end": "Value must be a number, greater than 0",
+    "setting:err:lang": "There is no language pack for that language. Please choose from the available packs: {}",
 
     "mysetting:updated": "updated setting `{}` to: `{}`",
     "mysetting:timezone:help": "Your timezone setting must be a valid TZ Database Name. Please see the following wikipedia page and choose your timezone from the TZ Database Name column: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones (It should look something like `Europe/London`)",

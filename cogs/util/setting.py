@@ -63,6 +63,14 @@ class Setting(commands.Cog, CommandWrapper):
         setting = args['setting'].lower()
         value = args['value']
 
+        # Check that the value is valid for the setting they are updating
+        if setting == 'sprint_delay_end' and (not lib.is_number(value) or int(value) < 1):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('setting:err:sprint_delay_end', guild.get_id()))
+
+        if setting == 'lang' and not lib.is_supported_language(value):
+            return await context.send(user.get_mention() + ', ' + lib.get_string('setting:err:lang', guild.get_id()).format(', '.join(lib.get_supported_languages())))
+
+
         guild.update_setting(setting, value)
         return await context.send(user.get_mention() + ', ' + lib.get_string('setting:updated', guild.get_id()).format(setting, value))
 

@@ -319,6 +319,20 @@ class Event:
                 'words': amount
             })
 
+    def add_words(self, user_id, amount):
+        """
+        Add to the user's word count for the event
+        :param user_id:
+        :param amount:
+        :return:
+        """
+        amount = int(amount)
+        record = self.__db.get('user_events', {'user': user_id, 'event': self.get_id()})
+        if record:
+            amount = int(record['words']) + amount
+
+        return self.update_wordcount(user_id, amount)
+
     async def say(self, message, embed=False):
         """
         Send a message, either from the context or directly from the bot, depending on how it was called
@@ -386,8 +400,8 @@ class Event:
         if limit is None:
             footer = None
 
-        # If the event is not running, don't show the footer and adjust the description to take out 'so far'
-        if not self.is_running():
+        # If the event is finished, don't show the footer and adjust the description to take out 'so far'
+        if self.is_ended():
             description = lib.get_string('event:leaderboard:desc:ended', self.get_guild()).format(self.get_title())
             footer = None
 

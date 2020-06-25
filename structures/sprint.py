@@ -1,6 +1,7 @@
 import lib, math, numpy, time
 from operator import itemgetter
 from structures.db import Database
+from structures.event import Event
 from structures.guild import Guild
 from structures.project import Project
 from structures.task import Task
@@ -405,7 +406,10 @@ class Sprint:
                     project = Project(user_sprint['project'])
                     project.add_words(wordcount)
 
-                # TODO: Event
+                # is there an event running on this server?
+                event = Event.get_by_guild(self._guild)
+                if event and event.is_running():
+                    event.add_words(user.get_id(), wordcount)
 
                 # Push user to results
                 results.append({

@@ -1,6 +1,7 @@
 import discord, lib
 from discord.ext import commands
 from structures.db import Database
+from structures.event import Event
 from structures.project import Project
 from structures.user import User
 from structures.wrapper import CommandWrapper
@@ -59,7 +60,9 @@ class Wrote(commands.Cog, CommandWrapper):
             message = lib.get_string('wrote:addedtoproject', user.get_guild()).format(str(amount), project.get_title())
 
         # # Is there an Event running?
-        # # TODO
+        event = Event.get_by_guild(user.get_guild())
+        if event and event.is_running():
+            event.add_words(user.get_id(), amount)
 
         # Increment their words written statistic
         user.add_stat('total_words_written', amount)

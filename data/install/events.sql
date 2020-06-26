@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS events (
     enddate BIGINT NULL,
     started INTEGER NOT NULL DEFAULT 0,
     ended INTEGER NOT NULL DEFAULT 0
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

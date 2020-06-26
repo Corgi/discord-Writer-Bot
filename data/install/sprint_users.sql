@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS sprint_users (
     ending_wc INTEGER DEFAULT 0,
     project INTEGER NULL,
     event INTEGER NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

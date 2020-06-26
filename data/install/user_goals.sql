@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS user_goals (
     current INTEGER NOT NULL,
     completed BOOLEAN NOT NULL,
     reset BIGINT NOT NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

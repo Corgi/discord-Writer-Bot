@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS tasks (
     processing INTEGER NOT NULL DEFAULT 0,
     recurring INTEGER NOT NULL DEFAULT 0,
     runeveryseconds INTEGER NULL
-)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

@@ -3,3 +3,4 @@ settings.json
 logs/
 test.py
 TODO
+*.idea

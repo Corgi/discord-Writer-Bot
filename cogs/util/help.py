@@ -33,6 +33,7 @@ class Help(commands.Cog, CommandWrapper):
             help_embed.add_field(name='`mysetting`', value=lib.get_string('help:mysetting', user.get_guild()), inline=True)
             help_embed.add_field(name='`ping`', value=lib.get_string('help:ping', user.get_guild()), inline=True)
             help_embed.add_field(name='`profile`', value=lib.get_string('help:profile', user.get_guild()), inline=True)
+            help_embed.add_field(name='`project`', value=lib.get_string('help:project', user.get_guild()), inline=True)
             help_embed.add_field(name='`quote`', value=lib.get_string('help:quote', user.get_guild()), inline=True)
             help_embed.add_field(name='`reassure`', value=lib.get_string('help:reassure', user.get_guild()), inline=True)
             help_embed.add_field(name='`reset`', value=lib.get_string('help:reset', user.get_guild()), inline=True)

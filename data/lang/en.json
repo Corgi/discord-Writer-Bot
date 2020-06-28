@@ -121,7 +121,7 @@
     "goal:set": "{} goal set to **{}** words. This will reset every midnight ({}). Now, get writing!",
     "goal:met": "{} met their {} goal of {} words!      +{}xp",
 
-"help:about": "Info and Stats about the bot.",
+    "help:about": "Info and Stats about the bot.",
     "help:admin": "Run admin commands.",
     "help:ask": "Asks you questions about your story.",
     "help:challenge": "Totally Random Writing challenges.",
@@ -148,15 +148,15 @@
     
     "help:askCharSub": "Asks a question about your characters.",
     "help:askWorldSub": "Asks a question about your world.",
-    "help:askFooter": "`!ask character` can also be run as `!ask char` or `!ask c`. `!ask world` can also be run as `!ask w`.",
+    "help:askFooter": "`ask character` can also be run as `ask char` or `ask c`. `ask world` can also be run as `ask w`.",
     
     "help:challengeSub": "Generates a totally random writing challenge.",
     "help:challengeEasySub": "Generates a totally random writing challenge at 5 wpm. 20xp for completion.",
     "help:challengeNormalSub": "Generates a totally random writing challenge at 10 wpm. 40xp for completion.",
     "help:challengeHardSub": "Generates a totally random writing challenge at 20 wpm. 75xp for completion.",
     "help:challengeHardcoreSub": "Generates a totally random writing challenge at 40 wpm. 100xp for completion.",
-    "help:challegeInsaneSub": "Generates a totally random writing challenge at 60 wpm. 150xp for completion.",
-    "help:challenge:10wpSub": "Generates a totally random writing challenge at 10wpm (10 can be changed to your desired wpm.)",
+    "help:challengeInsaneSub": "Generates a totally random writing challenge at 60 wpm. 150xp for completion.",
+    "help:challenge10wpmSub": "Generates a totally random writing challenge at 10wpm (10 can be changed to your desired wpm.)",
     "help:challenge15Sub": "Generates a totally random writing challenge for 15 minutes (15 can be changed to your desired time in minutes.)",
     "help:challengeNormal18Sub": "Generates a totally random writing challenge with normal difficulty for 18 minutes (Normal can be changed for your desired difficulty. 18 change be changed to your desired time in minutes.",
     "help:challengeCancelSub": "Cancels your current challenge.",
@@ -167,7 +167,7 @@
     
     "help:eventCreateSub": "Create an event called 'My Event Title'.",
     "help:eventRenameSub": "Rename event to 'My New Event Title'.",
-    "help:eventDescSub": "Set the descript of the event  to 'This is the description'.",
+    "help:eventDescSub": "Set the description of the event  to 'This is the description'.",
     "help:eventImageSub": "Set the thumbnail image for the event to the image URL specified.",
     "help:eventDeleteSub": "Deletes the current event.",
     "help:eventScheduleSub": "Starts the event scheduling wizard.",
@@ -191,7 +191,7 @@
     "help:generateBookHorrorSub": "Generates 10 horror book titles.",
     "help:generateBookRomSub": "Generates 10 romance/erotic book titles.",
     "help:generateBookMysSub": "Generates 10 mystery book titles.",
-    "help:generateHPSub": "Generates 10 Harry Potter book titles.",
+    "help:generateBookHPSub": "Generates 10 Harry Potter book titles.",
     "help:generatePromptSub": "Generates a random story prompt.",
     "help:generateIdeaSub": "Generates a random story idea.",
     "help:generatePlace20Sub": "Generates 20 place names (Place can be changed to any of the above choices. 20 can be changed to you desired amount.)",
@@ -203,14 +203,15 @@
 
     "help:mysettingTzSub": "Sets your timezone. (America/New_York can be changed to your desired timezone.)",
     "help:mysettingUrlSub": "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
+    "help:mysetting:footer": "For the timezone setting, make sure the value you specify is a valid TZ Database Name from this wikipedia page: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",
     
     "help:pingSub": "Displays the amount of latency between the bot and the client.",
 
     "help:profileSub": "Displays your Writer Bot profile and statistics.",
 
-    "help:projectCreateSub": "Creates a new project with the shortname 'sword' (used to refrence the project when updating), and the full title 'The Sword in the Stone'",
+    "help:projectCreateSub": "Creates a new project with the shortname 'sword' (used to reference the project when updating), and the full title 'The Sword in the Stone'",
     "help:projectDeleteSub": "Deletes the project with the shortname 'sword'",
-    "help:projectRenameSub": "Rename the project with the shortname 'sword' to shortname:sword2 and title: The Sword in the Stone Two. (If you want to keep the same shortname but change the title just use the same short name, e.g. `!project rename sword sword Sword in the Stone Two`",
+    "help:projectRenameSub": "Rename the project with the shortname 'sword' to shortname: 'sword2' and title: 'The Sword in the Stone Two'. (If you want to keep the same shortname but change the title just use the same short name, e.g. `!project rename sword sword Sword in the Stone Two`",
     "help:projectUpdateSub": "Sets the project with the shortname 'sword' word count to 6500 (6500 can be changed to your desired word count.)",
     "help:projectCompleteSub": "Marks the project with the shortname 'sword' as completed.",
     "help:projectUncompleteSub": "Marks the project the the shortname 'sword' as uncompleted.",
@@ -228,20 +229,19 @@
     
     "help:rollSub": "Rolls on 6-sided die.",
     "help:roll8Sub": "Rolls one 8-sided die.(8 can be changed out for your desired number. Max is 100.",
-    "help:roll3d20Sub": "Rolls three 20-sided dice. (3 can be changed out for you desired number, max is 100. 20 can be changed out for you desired number, max is 100.)",
-    "help:roll100d100Sub": "Rolls the maxium, one-hundred 100-sided dice.",
+    "help:roll3d20Sub": "Rolls three 20-sided dice. (3 can be changed out for you desired number, max is 100. 20 can be changed out for you desired number.)",
 
-    "help:sprintStartSub": "Starts a sprint with the deafault settings.",
+    "help:sprintStartSub": "Starts a sprint with the default settings.",
     "help:sprint20in3Sub": "Schedules a sprint for 20 minutes, to start in 3 minutes.",
     "help:sprintJoinSub": "Joins the current sprint.",
     "help:sprintCancelSub": "Cancels the current sprint.",
     "help:sprintJoin100Sub": "Joins the current sprint with a **starting** word count of 100(100 can be changed for your desired starting word count.)",
-    "help:sprintJoin100SwordSub": "Joins the current sprint with a **starting** word count of 100 and sets your sprint to count to the project with a shrotname of 'sword'(100 can be changed for you desired word count.)",
+    "help:sprintJoin100SwordSub": "Joins the current sprint with a **starting** word count of 100 and sets your sprint to count to the project with a shortname of 'sword' (100 can be changed for you desired word count.)",
     "help:sprintLeaveSub": "Leaves the current sprint.",
-    "help:sprintProjectSwordSub": "Sets your sprint to count towrads your project with the shortname of 'sword'.",
+    "help:sprintProjectSwordSub": "Sets your sprint to count towards your project with the shortname of 'sword'.",
     "help:sprintWc250Sub": "Declares your final word count for the sprint at 250 words.",
     "help:sprintTimeSub": "Displays the amount of time left in the current sprint.",
-    "help:sprintPbSub": "Displays your personal best wpm on the current server.",
+    "help:sprintPbSub": "Displays your personal best wpm from sprints.",
     "help:sprintNotifySub": "You will now get notification when someone stats a new sprint on your current server.",
     "help:sprintForgetSub": "You will now no longer be notified when someone starts a new sprint on your current server.",
     "help:sprintStatusSub": "Shows your current word count for the current sprint.",
@@ -250,6 +250,7 @@
     "help:todoSub": "Displays the current todo list for the bot.",
    
     "help:wroteSub": "Adds 500 to your total words written statistic (500 can be changed for your desired words written.)",
+    "help:wroteprojectSub": "Adds 500 to your project with the shortname 'sword' (500 can be changed for your desired words written.)",
 
     "help:xpSub": "Displays your xp/level.",
     "help:xpTopSub": "Shows the top ten users on the current server.",

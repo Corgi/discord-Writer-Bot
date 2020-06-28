@@ -6,6 +6,9 @@ from structures.wrapper import CommandWrapper
 
 class Help(commands.Cog, CommandWrapper):
 
+    def __init__(self, bot):
+        self.bot = bot
+
     @commands.command(name='help')
     @commands.guild_only()
     async def help(self, context, command="help"):
@@ -15,9 +18,11 @@ class Help(commands.Cog, CommandWrapper):
 
         user = User(context.message.author.id, context.guild.id, context)
 
+        command = command.lower()
+
         if command == "help":
-            help_embed = discord.Embed(title="Help with Writer Bot", description="For more help with a command run `help [command]`", color=discord.Color.blurple)
-            help_embed.add_field(name='`about`', value=lib.get_string('help:about', user.get_guild()), inline=True)  
+            help_embed = discord.Embed(title="Help with Writer Bot", description="For more help with a command run `help [command]`", color=discord.Color.blurple())
+            help_embed.add_field(name='`about`', value=lib.get_string('help:about', user.get_guild()), inline=True)
             help_embed.add_field(name='`admin`', value=lib.get_string('help:admin', user.get_guild()), inline=True)
             help_embed.add_field(name='`ask`', value=lib.get_string('help:ask', user.get_guild()), inline=True)
             help_embed.add_field(name='`challenge`', value=lib.get_string('help:challenge', user.get_guild), inline=True)
@@ -38,55 +43,55 @@ class Help(commands.Cog, CommandWrapper):
             help_embed.add_field(name='`xp`', value=lib.get_string('help:xp', user.get_guild()), inline=True)
             help_embed.add_field(name='`help`', value=lib.get_string('help:help', user.get_guild()), inline=True)
 
-            await context.send(embed=help_embed)
+            return await context.send(embed=help_embed)
 
-        elif command == 'help about':
+        elif command == 'about':
             about_embed=discord.Embed(title="Help with `about` command.", color=3897943)
             about_embed.add_field(name="`about`", value=lib.get_string("help:aboutSub", user.get_guild()), inline=True)
 
-            await context.send(embed=about_embed)
+            return await context.send(embed=about_embed)
 
-        elif command == 'help admin':
+        elif command == 'admin':
            admin_embed=discord.Embed(title="Help with `admin` command.", color=3897943)
-           admin_embed.add_field(name='`admin`', value=lib.get_string('helpadminSub', user.get_guild()), inline=True)
+           admin_embed.add_field(name='`admin`', value=lib.get_string('help:adminSub', user.get_guild()), inline=True)
 
-           await context.send(embed=admin_embed)
+           return await context.send(embed=admin_embed)
 
-        elif command == 'help ask':
+        elif command == 'ask':
             ask_embed=discord.Embed(title="Help with `ask` command.", color=3897943)
             ask_embed.add_field(name='`ask character`', value=lib.get_string('help:askCharSub', user.get_guild()), inline=True)
             ask_embed.add_field(name='`ask world`', value=lib.get_string('help:askWorldSub', user.get_guild()), inline=True)
             ask_embed.set_footer(text=lib.get_string('help:askFooter', user.get_guild()))
 
-            await context.send(embed=ask_embed)
+            return await context.send(embed=ask_embed)
 
-        elif command == 'help challenge':
+        elif command == 'challenge':
             challenge_embed=discord.Embed(title="Help with `challenge` command.", color=3897943)
             challenge_embed.add_field(name='`challenge`', value=lib.get_string('help:challengeSub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge easy`', value=lib.get_string('help:challengeEasySub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge normal`', value=lib.get_string('help:challengeNormalSub', user.get_guild()), inline=True)
-            challenge_embed.add_field(name='`challenge hard`', value=lib.get_string('help:challengeHardSub', user.get_guild), inline=True)         
-            challenge_embed.add_field(name='`challenge hardcore', value=lib.get_string('help:challengeHardcoreSub', user.get_guild()), inline=True)
-            challenge_embed.add_field(name='`challenge insane', value=lib.get_string('help:challengeInsaneSub', user.get_guild()), inline=True)
+            challenge_embed.add_field(name='`challenge hard`', value=lib.get_string('help:challengeHardSub', user.get_guild), inline=True)
+            challenge_embed.add_field(name='`challenge hardcore`', value=lib.get_string('help:challengeHardcoreSub', user.get_guild()), inline=True)
+            challenge_embed.add_field(name='`challenge insane`', value=lib.get_string('help:challengeInsaneSub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge 10wpm`', value=lib.get_string('help:challenge10wpmSub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge 15m`', value=lib.get_string('help:challenge15Sub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge normal 18m`', value=lib.get_string('help:challengeNormal18Sub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge cancel`', value=lib.get_string('help:challengeCancelSub', user.get_guild()), inline=True)
             challenge_embed.add_field(name='`challenge complete`', value=lib.get_string('help:challengeCompleteSub', user.get_guild()), inline=True)
-            challenge_embed.set_footer(text=lib.get_string('help:challengeFooter.', user.get_guild()))
-            
-            await context.send(embed=challenge_embed)
+            challenge_embed.set_footer(text=lib.get_string('help:challengeFooter', user.get_guild()))
 
-        elif command == 'help 8ball':
-            ball_embed=discord.Embed(title='Help with `8abll` command.', color=3897943)
+            return await context.send(embed=challenge_embed)
+
+        elif command == '8ball':
+            ball_embed=discord.Embed(title='Help with `8ball` command.', color=3897943)
             ball_embed.add_field(name='`8ball`', value=lib.get_string('help:8ballSub', user.get_guild()), inline=True)
-            
-            await context.send(embed=ball_embed)
 
-        elif command == 'help event':
+            return await context.send(embed=ball_embed)
+
+        elif command == 'event':
             event_embed=discord.Embed(title="Help with `event` command.", color=3897943)
-            event_embed.add_field(name='`event create My event title', value=lib.get_string('help:eventCreateSub', user.get_guild()), inline=True)
-            event_embed.add_field(name='`event rename My New event title', value=lib.get_string('help:eventRenameSub', user.get_guild()), inline=True)
+            event_embed.add_field(name='`event create My event title`', value=lib.get_string('help:eventCreateSub', user.get_guild()), inline=True)
+            event_embed.add_field(name='`event rename My New event title`', value=lib.get_string('help:eventRenameSub', user.get_guild()), inline=True)
             event_embed.add_field(name='`event description This is the description`', value=lib.get_string('help:eventDescSub', user.get_guild()), inline=True)
             event_embed.add_field(name='`event image https://i.imgur.com/tJtAdNs.png`', value=lib.get_string('help:eventImageSub', user.get_guild()), inline=True)
             event_embed.add_field(name='`event delete`', value=lib.get_string('help:eventDeleteSub', user.get_guild()), inline=True)
@@ -101,58 +106,59 @@ class Help(commands.Cog, CommandWrapper):
             event_embed.add_field(name='`event info`', value=lib.get_string('help:eventInfoSub', user.get_guild()), inline=True)
             event_embed.set_footer(text=lib.get_string('help:eventFooter', user.get_guild()))
 
-            await context.send(embed=event_embed)
+            return await context.send(embed=event_embed)
 
-        elif command == 'help flip':
+        elif command == 'flip':
             flip_embed=discord.Embed(title="Help with `flip` command.", color=3897943)
             flip_embed.add_field(name='`flip`', value=lib.get_string('help:flipSub', user.get_guild()), inline=True)
 
-            await context.send(embed=flip_embed)
+            return await context.send(embed=flip_embed)
 
-        elif command == 'help generate':
+        elif command == 'generate':
             gen_embed=discord.Embed(title="Help with `generate` command.", color=3897943)
             gen_embed.add_field(name='`generate character`', value=lib.get_string('help:generateCharSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate place`', value=lib.get_string('help:generatePlaceSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate book`', value=lib.get_string('help:generateBookSub', user.get_guild()), inline=True)
-            gen_embed.add_field(name='`generate book_fantasy', value=lib.get_string('help:generateFanSub', user.get_guild()), inline=True)
-            gen_embed.add_field(name='`generate book_sf`', value=lib.get_string('help:generateSFSub', user.get_guild()), inline=True)
-            gen_embed.add_field(name='`generate book_horror`', value=lib.get_string('help:generateBookHorroSub', user.get_guild()), inline=True)
-            gen_embed.add_field(name='`generate book_rom`', value=lib.get_string('help:generateRomSub', user.get_guil()), inline=True)
-            gen_embed.add_field(name='`generate book_mystery`', value=lib.get_string('help:generateMysSub', user.get_guild()), inline=True)
-            gen_embed.add_field(name='`generate book_hp`', value=lib.get_string('help:generateHPSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_fantasy`', value=lib.get_string('help:generateBookFanSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_sf`', value=lib.get_string('help:generateBookSFSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_horror`', value=lib.get_string('help:generateBookHorrorSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_rom`', value=lib.get_string('help:generateBookRomSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_mystery`', value=lib.get_string('help:generateBookMysSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate book_hp`', value=lib.get_string('help:generateBookHPSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate idea`', value=lib.get_string('help:generateIdeaSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate prompt`', value=lib.get_string('help:generatePromptSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate place 20`', value=lib.get_string('help:generatePlace20Sub', user.get_guild()), inline=True)
 
-            await context.send(embed=event_embed)
+            return await context.send(embed=gen_embed)
 
-        elif command == 'help goal':
+        elif command == 'goal':
             goal_embed=discord.Embed(title='Help with `goal` command.', color=3897943)
             goal_embed.add_field(name='`goal`', value=lib.get_string('help:goalSub', user.get_guild()), inline=True)
             goal_embed.add_field(name='`goal set 500`', value=lib.get_string('help:goalSetSub', user.get_guild()), inline=True)
             goal_embed.add_field(name='`goal cancel`', value=lib.get_string('help:goalCancelSub', user.get_guild()), inline=True)
 
-            await context.send(embed=goal_embed)
+            return await context.send(embed=goal_embed)
 
-        elif command == 'help mysetting':
+        elif command == 'mysetting' or command == 'myset':
             setting_embed=discord.Embed(title='Help with `mysetting` command.', color= 3897943, url=lib.get_string('help:mysettingUrlSub', user.get_guild()))
             setting_embed.add_field(name='`mysetting timezone America/New_York`', value=lib.get_string('help:mysettingTzSub', user.get_guild()), inline=True)
+            setting_embed.set_footer(text=lib.get_string('help:mysetting:footer', user.get_guild()))
 
-            await context.send(embed=setting_embed)
+            return await context.send(embed=setting_embed)
 
-        elif command == 'help ping':
+        elif command == 'ping':
             ping_embed=discord.Embed(title='Help with `ping` command.', color=3897943)
             ping_embed.add_field(name='`ping`', value=lib.get_string('help:pingSub', user.get_guild()), inline=True)
 
-            await context.send(embed=ping_embed)
+            return await context.send(embed=ping_embed)
 
-        elif command == 'help profile':
-            profile_embed=discord.Embed(title='`Help with `profile` command.', color=3897943)
+        elif command == 'profile':
+            profile_embed=discord.Embed(title='Help with `profile` command.', color=3897943)
             profile_embed.add_field(name='`profile`', value=lib.get_string('help:profileSub', user.get_guild()), inline=True)
 
-            await context.send(embed=profile_embed)
+            return await context.send(embed=profile_embed)
 
-        elif command == 'help project':
+        elif command == 'project':
             project_embed=discord.Embed(title='Help with `project` command.',  color=3897943)
             project_embed.add_field(name='`project create sword The Sword in the Stone`', value=lib.get_string('help:projectCreateSub', user.get_guild()), inline=True)
             project_embed.add_field(name='`project delete sword`', value=lib.get_string('help:projectDeleteSub', user.get_guild()), inline=True)
@@ -161,40 +167,39 @@ class Help(commands.Cog, CommandWrapper):
             project_embed.add_field(name='`project complete sword`', value=lib.get_string('help:projectCompleteSub', user.get_guild()), inline=True)
             project_embed.add_field(name='`project restart sword`', value=lib.get_string('help:projectUncompleteSub', user.get_guild()), inline=True)
             project_embed.set_footer(text=lib.get_string('help:projectFooter', user.get_guild()))
-            
-            await context(embed=project_embed)
 
-        elif command == 'help quote':
+            return await context.send(embed=project_embed)
+
+        elif command == 'quote':
             quote_embed=discord.Embed(title='Help with `quote` command.', color=387943)
             quote_embed.add_field(name='`quote`', value=lib.get_string('help:quoteSub', user.get_guild()), inline=True)
-            
-            await context.send(embed=quote_embed)    
 
-        elif command == 'help reassure':
+            return await context.send(embed=quote_embed)
+
+        elif command == 'reassure':
             reassure_embed=discord.Embed(title='Help with `reassure` command.', color=3897943)
             reassure_embed.add_field(name='`reassure`', value=lib.get_string('help:reassureSub', user.get_guild()), inline=True)
-            
-            await context.send(embed=reassure_embed)
 
-        elif command == 'help reset':
+            return await context.send(embed=reassure_embed)
+
+        elif command == 'reset':
             reset_embed=discord.Embed(title='Help with `reset` command.', color=3897943)
             reset_embed.add_field(name='`reset pb`', value=lib.get_string('help:resetPbSub', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset wc`', value=lib.get_string('help:resetWcSub', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset xp`', value=lib.get_string('help:resetXpSub', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset all`', value=lib.get_string('help:resetAllSub', user.get_guild()), inline=True)
-            
-            await context.send(embed=reset_embed)   
 
-        elif command == 'help roll':
+            return await context.send(embed=reset_embed)
+
+        elif command == 'roll':
             roll_embed=discord.Embed(title='Help with `roll` command.', color=3897943)
             roll_embed.add_field(name='`roll`', value=lib.get_string('help:rollSub', user.get_guild()), inline=True)
-            roll_embed.add_field(name='`roll 8`', value=lib.get_string('help:roll8Sub', user.get_guild()), inline=True)
+            roll_embed.add_field(name='`roll 1d8`', value=lib.get_string('help:roll8Sub', user.get_guild()), inline=True)
             roll_embed.add_field(name='`roll 3d20`', value=lib.get_string('help:roll3d20Sub', user.get_guild()), inline=True)
-            roll_embed.add_field(name='`roll 100d100`', value=lib.get_string('help:roll100d100', user.get_guild()), inline=True)
-            
-            await context.send(embed=roll_embed)
 
-        elif command == 'help sprint':
+            return await context.send(embed=roll_embed)
+
+        elif command == 'sprint':
             sprint_embed=discord.Embed(title='Help with `sprint` Command.', color=3897943)
             sprint_embed.add_field(name='`sprint start`', value=lib.get_string('help:sprintStartSub', user.get_guild()), inline=True)
             sprint_embed.add_field(name='`sprint for 20 in 3`', value=lib.get_string('help:sprint20in3Sub', user.get_guild()), inline=True)
@@ -212,26 +217,27 @@ class Help(commands.Cog, CommandWrapper):
             sprint_embed.add_field(name='`sprint status`', value=lib.get_string('help:sprintStatusSub', user.get_guild()), inline=True)
             sprint_embed.set_footer(text=lib.get_string('help:sprintFooter', user.get_guild()))
 
-            await context.send(embed=sprint_embed)
+            return await context.send(embed=sprint_embed)
 
-        elif command == 'help todo':
+        elif command == 'todo':
             todo_embed=discord.Embed(title='Help with `todo` command.', color=3897943)
             todo_embed.add_field(name='`todo`', value=lib.get_string('help:todoSub', user.get_guild()), inline=True)
-            
-            await context.send(embed=todo_embed)    
 
-        elif command == 'help wrote':
+            return await context.send(embed=todo_embed)
+
+        elif command == 'wrote':
             wrote_embed=discord.Embed(title='Help with `wrote` command', color=3897943)
             wrote_embed.add_field(name='`wrote 500`', value=lib.get_string('help:wroteSub', user.get_guild()), inline=True)
-            
+            wrote_embed.add_field(name='`wrote 500 sword`', value=lib.get_string('help:wroteprojectSub', user.get_guild()), inline=True)
+
             await context.send(content=None, embed=wrote_embed)
 
-        elif command == 'help xp':
+        elif command == 'xp':
             xp_embed=discord.Embed(title='Help with `xp` command.', color=3897943)
             xp_embed.add_field(name='`xp`', value=lib.get_string('help:xpSub', user.get_guild()), inline=True)
             xp_embed.add_field(name='`xp top`', value=lib.get_string('help:xpTopSub', user.get_guild()), inline=True)
             
-            await context.send(embed=xp_embed)
+            return await context.send(embed=xp_embed)
 
 
 

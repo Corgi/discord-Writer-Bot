@@ -6,4 +6,4 @@ cd /var/www/discord-Writer-Bot/
 chmod +x run.py
 
 # Start it and redirect output.
-nohup python3 -u run.py > logs/out.log &
+nohup python3 -u run.py > logs/bot.log 2> logs/error.log < /dev/null &

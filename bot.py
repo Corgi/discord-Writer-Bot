@@ -114,6 +114,9 @@ class WriterBot(AutoShardedBot):
         # Restart all tasks which are marked as processing, in case the bot dropped out during the process.
         db.update('tasks', {'processing': 0})
 
+        # Remove the default 'help' command.
+        self.remove_command('help')
+
     def setup_recurring_tasks(self):
         """
         Create the recurring tasks for the first time.

@@ -3,6 +3,22 @@ require 'conn.inc.php';
 
 $sparkle->query('truncate projects');
 
+// First convert any with messed up emoji symbols. This should only run once.
+$all = $old->query("select * from projects where shortname like '%?%'")->fetchAll();
+if ($all) {
+  foreach ($all as $record) {
+
+    $st = $old->prepare('update projects set shortname = :shortname where id = :id');
+    $st->execute([
+      'id' => $record['id'],
+      'shortname' => $record['id']
+    ]);
+
+  }
+}
+
+
+
 $sql = " select user, name, shortname, completed, MAX(words) as words
 from projects
 group by user, shortname";

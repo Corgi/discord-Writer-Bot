@@ -68,6 +68,9 @@ class WriterBot(AutoShardedBot):
         elif isinstance(error, commands.errors.MissingPermissions):
             user = User(context.message.author.id, context.guild.id, context)
             return await context.send(user.get_mention() + ', ' + str(error))
+        elif isinstance(error, commands.errors.CommandInvokeError):
+            user = User(context.message.author.id, context.guild.id, context)
+            return await context.send(lib.get_string('err:commandinvoke', user.get_guild()))
         else:
             lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
             lib.error( traceback.format_exception(type(error), error, error.__traceback__) )

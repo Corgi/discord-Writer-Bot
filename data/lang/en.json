@@ -266,7 +266,7 @@
     "project:recompleted": "Project re-completed",
     "project:completed": "completed their project {}!     +{}xp",
     "project:noprojects": "You do not have any projects. Why not create one?",
-    "project:argument:cmd": "What do you want to do? `create` a project, `delete` a project, `view` a project, `rename` a project, or `update` a project?",
+    "project:argument:cmd": "What do you want to do? `create` a project, `delete` a project, `view` a project, `rename` a project, or `update` a project? (Please see: `help project` for the full format for each of those commands)",
     "project:err:argument:cmd": "Invalid project command.",
     "project:err:names": "Please make sure your project shortname and title are set: `project create shortname title` (e.g. `project create test My Test Book`).",
     "project:err:exists": "You already have a project with that shortname ({}).",

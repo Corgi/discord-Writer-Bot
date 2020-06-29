@@ -9,7 +9,7 @@
     "err:what?": "Error: I'm not sure what you mean...",
     "err:permissions": "Error: You do not have the permissions to do that on this server.",
     "err:yesorno": "Please respond with either `yes` or `no`.",
-    "err:commandinvoke": "Error invoking command. Bot may not have the correct permissions on this server. Please ensure it can READ and WRITE messages and EMBED LINKS.",
+    "err:commandinvoke": "**Error invoking command**\nThis could be caused by the bot not having all the correct permissions it needs on this server (READ, WRITE, EMBED_LINKS).\nIf you are sure the permissions are correct, please report this error on the Writer-Bot support server.",
 
     "admin:argument:cmd": "What are you trying to do?",
     "admin:err:argument": "Invalid argument",

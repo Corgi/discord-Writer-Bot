@@ -4,6 +4,7 @@ from structures.user import User
 
 class Event:
 
+    DEFAULT_COLOUR = 15105570
     LEADERBOARD_LIMIT = 10
     TASKS = {
         'start': 'start',  # This is the task for starting the event
@@ -130,7 +131,7 @@ class Event:
         Get the colour to use for the embedded messages for this event
         :return:
         """
-        return int(self.colour)
+        return int(self.colour) if self.colour is not None else self.DEFAULT_COLOUR
 
     def get_description(self):
         """

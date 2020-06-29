@@ -1,19 +1,18 @@
 {
   "short": [
-    "Fix up help command text: remove tildes and prefixes for all command text"
+
   ],
   "medium": [
     "Implement logging system, to track errors",
-    "Get rid of current EC2 instance and get the next one up",
-    "Deploy new Writer-Bot once testing is okay"
+    "Setup docker image and pipeline deployment"
   ],
   "long": [
-    "Setup docker image and pipeline deployment",
     "Change goal reset time to be based on user's timezone",
     "Goal time command to check how long it is until your goal resets",
     "Allow setting of different colour for event embedded message, from default orange",
     "Change roll command to allow for more DnD-like commands, like they have on Roll20",
     "Frequently Asked Questions command",
+    "Marathons - Like sprints but essentially multiple sprints in a row, with a short break between them",
     "Different types of goal: weekly, monthly, yearly",
     "Clean up task - Get rid of old sprints, events, etc... to free up database space",
     "Setup Patreon or similar to allow donations to support development/hosting",

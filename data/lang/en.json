@@ -2,14 +2,14 @@
 
     "err:nouser": "Error: Could not find that user",
     "err:validamount": "Error: Please enter a valid amount",
-    "err:unknown": "Error: Something went wrong, please try again. (If this error persists, please post it on the Writer-Bot-Support server, with steps to replicate the error)",
+    "err:unknown": "Error: Something went wrong, please try again. (If this error persists, please report it on the Writer-Bot-Support server, with steps to replicate the error).\n\nError Code: **{}**",
     "err:cmdoptions": "Error: Invalid command options",
     "err:invalidsetting": "Error: Invalid setting",
     "err:replytime": "Error: You did not reply within %s seconds, so this command has been cancelled.",
     "err:what?": "Error: I'm not sure what you mean...",
     "err:permissions": "Error: You do not have the permissions to do that on this server.",
     "err:yesorno": "Please respond with either `yes` or `no`.",
-    "err:commandinvoke": "**Error invoking command**\nThis could be caused by the bot not having all the correct permissions it needs on this server (READ, WRITE, EMBED_LINKS).\nIf you are sure the permissions are correct, please report this error on the Writer-Bot support server.",
+    "err:commandinvoke": "**Error invoking command**\nThis could be caused by the bot not having all the correct permissions it needs on this server (READ, WRITE, EMBED_LINKS).\nIf you are sure the permissions are correct, please report this error on the Writer-Bot support server.\n\nError code: **{}**",
 
     "admin:argument:cmd": "What are you trying to do?",
     "admin:err:argument": "Invalid argument",

@@ -1,4 +1,4 @@
-import json, math, os, pytz
+import json, math, os, pytz, random, string
 from collections import namedtuple
 from pprint import pprint
 from os import path
@@ -192,10 +192,29 @@ def debug(txt):
     time = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
     print('['+str(time)+'][DEBUG] ' + str(txt))
 
-def error(txt):
+def generate_error_code():
+    """
+    Generate a 12 character error code to store in the error log, so they can be found more easily from reports.
+    :return:
+    """
+    code = ''
+    for x in range(3):
+        code = code + ''.join(random.choice(string.ascii_uppercase) for i in range(3))
+        if x < 2:
+            code = code + '/'
+
+    return code
+
+def error(txt, use_code=None):
     """
     Do something with a message for debugging purposes
     :param txt:
     :return:
     """
-    print('[ERROR] ' + str(txt))
+    time = datetime.now().strftime("%Y-%m-%d, %H:%M:%S")
+    code = generate_error_code() if use_code is None else use_code
+
+    file = open('logs/error.log', 'a')
+    file.write('['+str(time)+'][ERROR]['+code+'] ' + str(txt))
+    file.close()
+    return code

@@ -7,8 +7,6 @@ from structures.guild import Guild
 from structures.task import Task
 from structures.user import User
 
-from pprint import pprint
-
 class WriterBot(AutoShardedBot):
 
     COMMAND_GROUPS = ['util', 'fun', 'writing']
@@ -69,13 +67,15 @@ class WriterBot(AutoShardedBot):
             user = User(context.message.author.id, context.guild.id, context)
             return await context.send(user.get_mention() + ', ' + str(error))
         elif isinstance(error, commands.errors.CommandInvokeError):
+            code = lib.error('CommandInvokeError in command `{}`: {}'.format(context.command, str(error)))
+            lib.error(traceback.format_exception(type(error), error, error.__traceback__), code)
             user = User(context.message.author.id, context.guild.id, context)
-            return await context.send(lib.get_string('err:commandinvoke', user.get_guild()))
+            return await context.send(lib.get_string('err:commandinvoke', user.get_guild()).format(code))
         else:
-            lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
-            lib.error( traceback.format_exception(type(error), error, error.__traceback__) )
+            code = lib.error('Exception in command `{}`: {}'.format(context.command, str(error)))
+            lib.error( traceback.format_exception(type(error), error, error.__traceback__), code )
             user = User(context.message.author.id, context.guild.id, context)
-            return await context.send(lib.get_string('err:unknown', user.get_guild()))
+            return await context.send(lib.get_string('err:unknown', user.get_guild()).format(code))
 
     def load_commands(self):
         """

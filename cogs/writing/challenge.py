@@ -183,7 +183,7 @@ class Challenge(commands.Cog, CommandWrapper):
         argument = {'prompt': message, 'check': lambda resp : resp.lower() in ('y', 'yes', 'n', 'no')}
 
         # Print the challenge and ask for confirmation response
-        response = await self.prompt(context, argument, True)
+        response = await self.adhoc_prompt(context, argument, True)
         if not response:
             return
 

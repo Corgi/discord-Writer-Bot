@@ -3,7 +3,7 @@ import lib
 
 class CommandWrapper:
 
-    TIMEOUT_WAIT=10
+    TIMEOUT_WAIT=30
 
     def __init__(self):
         self._arguments = []
@@ -51,7 +51,7 @@ class CommandWrapper:
 
         # Do we need to do any extra checks?
         if 'check' in argument and callable(argument['check']):
-            content = content.lower()
+            content = str(content).lower()
             if not argument['check'](content):
                 result = False
 
@@ -87,3 +87,24 @@ class CommandWrapper:
         except asyncio.TimeoutError:
             await req.edit(content=lib.get_string('req:timeout', context.guild.id))
             return False
+
+
+    async def adhoc_prompt(self, context, argument, raw_message=False, timeout=None):
+        """
+        This should be called if the prompt is being done manually in the code, instead of being used against the array of self.arguments
+        :param context:
+        :param argument:
+        :param raw_message:
+        :param timeout:
+        :return:
+        """
+        response = await self.prompt(context, argument, raw_message, timeout)
+        if not response:
+            return False
+
+        # We got a response, now do we need to check the type or do any extra content checks?
+        if not await self.check_content(argument, response.content, context):
+            await context.send( context.author.mention + ', ' + lib.get_string('err:cmdoptions', context.guild.id))
+            return False
+
+        return response

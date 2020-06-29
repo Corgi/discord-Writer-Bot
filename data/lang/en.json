@@ -123,7 +123,6 @@
     "goal:met": "{} met their {} goal of {} words!      +{}xp",
 
     "help:about": "Info and Stats about the bot.",
-    "help:admin": "Run admin commands.",
     "help:ask": "Asks you questions about your story.",
     "help:challenge": "Totally Random Writing challenges.",
     "help:8ball": "Ask a question to an 8ball.",
@@ -145,9 +144,7 @@
     "help:help": "Displays this message!",
 
     "help:aboutSub": "Displays info and stats about Writer Bot.",
-    
-    "help:adminSub": "Runs admin commands.",
-    
+
     "help:askCharSub": "Asks a question about your characters.",
     "help:askWorldSub": "Asks a question about your world.",
     "help:askFooter": "`ask character` can also be run as `ask char` or `ask c`. `ask world` can also be run as `ask w`.",

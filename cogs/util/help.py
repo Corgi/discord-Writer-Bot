@@ -23,7 +23,6 @@ class Help(commands.Cog, CommandWrapper):
         if command == "help":
             help_embed = discord.Embed(title="Help with Writer Bot", description="For more help with a command run `help [command]`", color=discord.Color.blurple())
             help_embed.add_field(name='`about`', value=lib.get_string('help:about', user.get_guild()), inline=True)
-            help_embed.add_field(name='`admin`', value=lib.get_string('help:admin', user.get_guild()), inline=True)
             help_embed.add_field(name='`ask`', value=lib.get_string('help:ask', user.get_guild()), inline=True)
             help_embed.add_field(name='`challenge`', value=lib.get_string('help:challenge', user.get_guild), inline=True)
             help_embed.add_field(name='`8ball`', value=lib.get_string('help:8ball', user.get_guild()), inline=True)
@@ -51,12 +50,6 @@ class Help(commands.Cog, CommandWrapper):
             about_embed.add_field(name="`about`", value=lib.get_string("help:aboutSub", user.get_guild()), inline=True)
 
             return await context.send(embed=about_embed)
-
-        elif command == 'admin':
-           admin_embed=discord.Embed(title="Help with `admin` command.", color=3897943)
-           admin_embed.add_field(name='`admin`', value=lib.get_string('help:adminSub', user.get_guild()), inline=True)
-
-           return await context.send(embed=admin_embed)
 
         elif command == 'ask':
             ask_embed=discord.Embed(title="Help with `ask` command.", color=3897943)

@@ -19,7 +19,7 @@ class Challenge(commands.Cog, CommandWrapper):
             {
                 'key': 'flag',
                 'prompt': 'challenge:argument:flag',
-                'required': True,
+                'required': False,
                 'error': 'challenge:argument:flag'
             },
             {
@@ -58,7 +58,9 @@ class Challenge(commands.Cog, CommandWrapper):
         if not args:
             return
 
-        flag = args['flag'].lower()
+        if flag is not None:
+            flag = args['flag'].lower()
+
         if flag2 is not None:
             flag2 = args['flag2'].lower()
 
@@ -142,30 +144,33 @@ class Challenge(commands.Cog, CommandWrapper):
         wpm = random.randint(self.WPM['min'], self.WPM['max'])
         time = random.randint(self.TIMES['min'], self.TIMES['max'])
 
-        if flag == 'easy':
-            wpm = 5
-        elif flag == 'normal':
-            wpm = 10
-        elif flag == 'hard':
-            wpm = 20
-        elif flag == 'hardcore':
-            wpm = 40
-        elif flag == 'insane':
-            wpm = 60
-        elif flag.isdigit():
-            # If it's just a digit, assume that's the WPM
-            wpm = int(flag)
-        elif flag.endswith('wpm'):
-            # If it ends with 'wpm' remove that and convert to an int for the WPM
-            wpm = int(re.sub(r'\D', '', flag))
-        elif flag.endswith('m'):
-            # If it ends with 'm' remove that and convert to an int for the time
-            time = int(re.sub(r'\D', '', flag))
+        if flag is not None:
 
-        # We can ask for a difficulty AND a time, using flag2. E.g. `normal 15m`. So if flag2 ends with 'm' calculate the time based on that.
-        # If for some reason they do both flags as time, e.g. `challenge 15m 25m` the second one will overwrite the first.
-        if flag2 is not None and flag2.endswith('m'):
-            time = int(re.sub(r'\D', '', flag2))
+            # Convert the flag to the corresponding WPM
+            if flag == 'easy':
+                wpm = 5
+            elif flag == 'normal':
+                wpm = 10
+            elif flag == 'hard':
+                wpm = 20
+            elif flag == 'hardcore':
+                wpm = 40
+            elif flag == 'insane':
+                wpm = 60
+            elif flag.isdigit():
+                # If it's just a digit, assume that's the WPM
+                wpm = int(flag)
+            elif flag.endswith('wpm'):
+                # If it ends with 'wpm' remove that and convert to an int for the WPM
+                wpm = int(re.sub(r'\D', '', flag))
+            elif flag.endswith('m'):
+                # If it ends with 'm' remove that and convert to an int for the time
+                time = int(re.sub(r'\D', '', flag))
+
+            # We can ask for a difficulty AND a time, using flag2. E.g. `normal 15m`. So if flag2 ends with 'm' calculate the time based on that.
+            # If for some reason they do both flags as time, e.g. `challenge 15m 25m` the second one will overwrite the first.
+            if flag2 is not None and flag2.endswith('m'):
+                time = int(re.sub(r'\D', '', flag2))
 
         goal = wpm * time
         xp = self.calculate_xp(wpm)

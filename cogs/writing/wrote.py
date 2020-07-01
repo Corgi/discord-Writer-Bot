@@ -57,7 +57,8 @@ class Wrote(commands.Cog, CommandWrapper):
                 return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
 
             project.add_words(amount)
-            message = lib.get_string('wrote:addedtoproject', user.get_guild()).format(str(amount), project.get_title())
+            total = user.get_stat('total_words_written') + int(amount)
+            message = lib.get_string('wrote:addedtoproject', user.get_guild()).format(str(amount), project.get_title(), project.get_words(), total)
 
         # # Is there an Event running?
         event = Event.get_by_guild(user.get_guild())

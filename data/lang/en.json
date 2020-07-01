@@ -324,7 +324,7 @@
     "event:numwriters": "Writers",
     "event:numwords": "Words Written",
 
-    "wrote:addedtoproject": "added {} words to their project **{}**",
+    "wrote:addedtoproject": "added {} words to their project **{} ({})** [{}]",
     "wrote:added": "added {} to their total words written **({})**",
     "wrote:argument:amount": "How many words did you write?",
     "wrote:err:type": "Amount of words must be a number",

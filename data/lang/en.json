@@ -83,6 +83,7 @@
     "reset:invalid": "Invalid reset option, must be one of `pb`, `wc`, `xp`, `all`",
     "reset:server": "whole server stats reset to 0",
     "reset:xp": "xp/level reset",
+    "reset:projects": "projects reset",
     "reset:argument:what": "What do you want to reset? WPM personal best: `pb`, Total word count: `wc`, Experience/Level: `xp`, or your entire profile: `all`?",
     "reset:argument:confirm": "Are you sure you want to do that? (`yes` or `no`)",
 
@@ -224,7 +225,8 @@
     "help:resetPbSub": "Resets your wpm personal best.",
     "help:resetWcSub": "Resets your total word count.",
     "help:resetXpSub": "Resets your xp/level to 0.",
-    "help:resetAllSub": "Resets your xp/level, stats, records, goals, and challenges.",
+    "help:reset:projects": "Deletes all of your projects.",
+    "help:resetAllSub": "Resets your xp/level, stats, records, goals, challenges and projects.",
     
     "help:rollSub": "Rolls on 6-sided die.",
     "help:roll8Sub": "Rolls one 8-sided die.(8 can be changed out for your desired number. Max is 100.",

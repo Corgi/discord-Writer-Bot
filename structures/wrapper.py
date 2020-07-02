@@ -108,3 +108,39 @@ class CommandWrapper:
             return False
 
         return response
+
+    async def split_send(self, context, user, message):
+        """
+        Send a long message (more than 2000 characters) by splitting it into several messages.
+        :param context:
+        :param user:
+        :param message:
+        :return:
+        """
+
+        # We'll do a shorter limit, just to give us some leeway.
+        max = 1750
+
+        # Split the message by newline characters.
+        split = message.split('\n')
+        count = len(split)
+        content = ''
+        i = 1
+
+        for line in split:
+
+            # Add the line to the current content, and then see if that takes us over the limit.
+            check = content + line + '\n'
+            if len(check) > max or i >= count:
+
+                # Send first part of message
+                await context.send(user.get_mention() + ', ' + content)
+
+                # Then start again with a new current message
+                content = line
+
+            else:
+                # No, carry on.
+                content = check
+
+            i += 1

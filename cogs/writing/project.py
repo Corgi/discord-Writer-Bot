@@ -139,7 +139,11 @@ class Project(commands.Cog, CommandWrapper):
             message += '**'+project.get_name()+'** ('+project.get_shortname()+')\n'
             message += lib.get_string('wordcount', user.get_guild()) + ': ' + str(project.get_words()) + '\n\n'
 
-        return await context.send(user.get_mention() + ', ' + lib.get_string('project:list', user.get_guild()) + message)
+        # Project lists can get very long. If it is over 2000 characters, we need to split it.
+        if len(message) >= 2000:
+            return await self.split_send(context, user, lib.get_string('project:list', user.get_guild()) + message)
+        else:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('project:list', user.get_guild()) + message)
 
     async def run_update(self, context, opts):
         """

@@ -56,6 +56,13 @@ class User:
         """
         return self.__bot is not None and self.__bot.app_info.owner.id == self._id
 
+    def reset_projects(self):
+        """
+        Delete all the user's projects
+        :return:
+        """
+        self.__db.delete('projects', {'user': self._id})
+
     def reset(self):
         """
         Reset the entire user's stats, records, xp, etc...
@@ -66,6 +73,7 @@ class User:
         self.__db.delete('user_records', {'user': self._id})
         self.__db.delete('user_stats', {'user': self._id})
         self.__db.delete('user_xp', {'user': self._id})
+        self.__db.delete('projects', {'user': self._id})
 
 
     def get_xp(self):

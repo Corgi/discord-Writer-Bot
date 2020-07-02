@@ -181,6 +181,7 @@ class Help(commands.Cog, CommandWrapper):
             reset_embed.add_field(name='`reset pb`', value=lib.get_string('help:resetPbSub', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset wc`', value=lib.get_string('help:resetWcSub', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset xp`', value=lib.get_string('help:resetXpSub', user.get_guild()), inline=True)
+            reset_embed.add_field(name='`reset projects`', value=lib.get_string('help:reset:projects', user.get_guild()), inline=True)
             reset_embed.add_field(name='`reset all`', value=lib.get_string('help:resetAllSub', user.get_guild()), inline=True)
 
             return await context.send(embed=reset_embed)

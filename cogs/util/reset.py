@@ -8,7 +8,7 @@ class Reset(commands.Cog, CommandWrapper):
 
     def __init__(self, bot):
         self.bot = bot
-        self._supported_resets = ['pb', 'wc', 'xp', 'all']
+        self._supported_resets = ['pb', 'wc', 'xp', 'projects', 'all']
         self._arguments = [
             {
                 'key': 'what',
@@ -65,6 +65,10 @@ class Reset(commands.Cog, CommandWrapper):
         elif what == 'xp':
             await user.update_xp(0)
             output = lib.get_string('reset:xp', user.get_guild())
+
+        elif what == 'projects':
+            user.reset_projects()
+            output = lib.get_string('reset:projects', user.get_guild())
 
         elif what == 'all':
             user.reset()

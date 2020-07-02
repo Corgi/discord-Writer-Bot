@@ -133,7 +133,7 @@
     "help:ping": "Latency between bot and client.",
     "help:profile": "View your writer bot profile.",
     "help:project": "Create and edit your writing projects.",
-    "help:quote": "A motiviational quote to inspire you.",
+    "help:quote": "A motivational quote to inspire you.",
     "help:reassure": "Reassure you that everything will be okay.",
     "help:reset": "Reset your Writer Bot Stats/Records.",
     "help:roll": "Roll a dice 1 through `n` number.",
@@ -147,7 +147,7 @@
 
     "help:askCharSub": "Asks a question about your characters.",
     "help:askWorldSub": "Asks a question about your world.",
-    "help:askFooter": "`ask character` can also be run as `ask char` or `ask c`. `ask world` can also be run as `ask w`.",
+    "help:askFooter": "`ask char` can also be run as `ask c`. `ask world` can also be run as `ask w`.",
     
     "help:challengeSub": "Generates a totally random writing challenge.",
     "help:challengeEasySub": "Generates a totally random writing challenge at 5 wpm. 20xp for completion.",

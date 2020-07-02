@@ -53,7 +53,7 @@ class Help(commands.Cog, CommandWrapper):
 
         elif command == 'ask':
             ask_embed=discord.Embed(title="Help with `ask` command.", color=3897943)
-            ask_embed.add_field(name='`ask character`', value=lib.get_string('help:askCharSub', user.get_guild()), inline=True)
+            ask_embed.add_field(name='`ask char`', value=lib.get_string('help:askCharSub', user.get_guild()), inline=True)
             ask_embed.add_field(name='`ask world`', value=lib.get_string('help:askWorldSub', user.get_guild()), inline=True)
             ask_embed.set_footer(text=lib.get_string('help:askFooter', user.get_guild()))
 

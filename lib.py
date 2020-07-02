@@ -215,6 +215,6 @@ def error(txt, use_code=None):
     code = generate_error_code() if use_code is None else use_code
 
     file = open('logs/error.log', 'a')
-    file.write('['+str(time)+'][ERROR]['+code+'] ' + str(txt))
+    file.write('['+str(time)+'][ERROR]['+code+'] ' + str(txt) + '\n')
     file.close()
     return code

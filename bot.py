@@ -100,6 +100,45 @@ class WriterBot(AutoShardedBot):
                         print(f'[EXT][{dir}.{cog}] failed to load')
                         print(e)
 
+    def update(self):
+        """
+        Run any database updates which are required
+        :return:
+        """
+        db = Database.instance()
+
+        version = lib.get('./version.json')
+        version = version.db_version
+
+        db_version = db.get('bot_settings', {'setting': 'version'})
+        current_version = db_version['value'] if db_version else 0
+
+        version = int(version)
+        current_version = int(current_version)
+
+        # Find all update files
+        for file in os.listdir(f'data/updates'):
+
+            # If it ends with .update then try to use it.
+            if file.endswith(".update"):
+
+                # Get the update version from the file name and convert to int for comparison.
+                update_version = int(file[:-7])
+
+                # Is this update due to run?
+                if update_version > current_version:
+
+                    # Load the file and the SQL to run.
+                    update = lib.get('./data/updates/' + file)
+
+                    # Loop through the array of SQL statements to run.
+                    for sql in update:
+                        print('[UPDATE] Running query `' + sql + '`')
+                        db.execute(sql, [])
+
+        # Once it's done, update the version in the database.
+        db.update('bot_settings', {'value': version}, {'setting': 'version'})
+
     def setup(self):
         """
         Run the bot setup
@@ -109,6 +148,9 @@ class WriterBot(AutoShardedBot):
         db = Database.instance()
         db.install()
         print('[DB] Database tables installed')
+
+        # Run any database updates.
+        self.update()
 
         # Setup the recurring tasks which need running.
         self.setup_recurring_tasks()

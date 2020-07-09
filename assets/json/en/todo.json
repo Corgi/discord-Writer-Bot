@@ -1,16 +1,13 @@
 {
   "short": [
-
   ],
   "medium": [
-    "Implement logging system, to track errors",
+    "project view shortname - To view word count of specific project",
     "Setup docker image and pipeline deployment"
   ],
   "long": [
-    "Change goal reset time to be based on user's timezone",
-    "Goal time command to check how long it is until your goal resets",
+    "Implement better logging system, to track errors",
     "Allow setting of different colour for event embedded message, from default orange",
-    "Change roll command to allow for more DnD-like commands, like they have on Roll20",
     "Frequently Asked Questions command",
     "Marathons - Like sprints but essentially multiple sprints in a row, with a short break between them",
     "Different types of goal: weekly, monthly, yearly",
@@ -21,5 +18,6 @@
   "nice": [
     "Have a think about possible 'Premium features' that could be offered for a small fee - Might be too complicated",
     "Setup website for Writer-Bot where you can manage things and see stats, server status, etc..."
+    "Define/Thesaurus command"
   ]
 }

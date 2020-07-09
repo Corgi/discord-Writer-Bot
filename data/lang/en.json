@@ -201,6 +201,7 @@
     "help:goalSetSub": "Sets your daily goal to 500 words. (500 can be changed to your desired amount of words.)",
     "help:goalSub": "Checks how close you are to your daily goal.",
     "help:goalCancelSub": "Cancels your daily goal.",
+    "help:goalTimeSub": "Checks how long until your goal resets",
 
     "help:mysettingTzSub": "Sets your timezone. (America/New_York can be changed to your desired timezone.)",
     "help:mysettingUrlSub": "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones",

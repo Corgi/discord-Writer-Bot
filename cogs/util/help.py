@@ -110,8 +110,9 @@ class Help(commands.Cog, CommandWrapper):
 
         elif command == 'generate':
             gen_embed=discord.Embed(title="Help with `generate` command.", color=3897943)
-            gen_embed.add_field(name='`generate character`', value=lib.get_string('help:generateCharSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate char`', value=lib.get_string('help:generateCharSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate place`', value=lib.get_string('help:generatePlaceSub', user.get_guild()), inline=True)
+            gen_embed.add_field(name='`generate land`', value=lib.get_string('help:generateLandSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate book`', value=lib.get_string('help:generateBookSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate book_fantasy`', value=lib.get_string('help:generateBookFanSub', user.get_guild()), inline=True)
             gen_embed.add_field(name='`generate book_sf`', value=lib.get_string('help:generateBookSFSub', user.get_guild()), inline=True)

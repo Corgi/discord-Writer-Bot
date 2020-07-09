@@ -195,7 +195,7 @@
     "help:generatePromptSub": "Generates a random story prompt.",
     "help:generateIdeaSub": "Generates a random story idea.",
     "help:generatePlace20Sub": "Generates 20 place names (Place can be changed to any of the above choices. 20 can be changed to you desired amount.)",
-    "help:generateFooter": "`generate character` can also be run as `gen",
+    "help:generateLandSub": "Generates 10 random fantasy land names",
 
     "help:goalSetSub": "Sets your daily goal to 500 words. (500 can be changed to your desired amount of words.)",
     "help:goalSub": "Checks how close you are to your daily goal.",

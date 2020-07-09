@@ -122,6 +122,7 @@
     "goal:givenup": "has given up on their goal. Boo.",
     "goal:set": "{} goal set to **{}** words. This will reset every midnight ({}). Now, get writing!",
     "goal:met": "{} met their {} goal of {} words!      +{}xp",
+    "goal:timeleft": "{} left until {} goal reset.",
 
     "help:about": "Info and Stats about the bot.",
     "help:ask": "Asks you questions about your story.",

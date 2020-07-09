@@ -1,4 +1,4 @@
-import discord, lib
+import discord, lib, time
 from discord.ext import commands
 from structures.db import Database
 from structures.user import User
@@ -37,8 +37,35 @@ class Goal(commands.Cog, CommandWrapper):
             return await self.run_set(context, value)
         elif option == 'cancel' or option == 'delete' or option == 'reset':
             return await self.run_cancel(context)
+        elif option == 'time':
+            return await self.run_time(context)
         else:
             return await self.run_check(context)
+
+    async def run_time(self, context):
+        """
+        Check how long until the goal resets
+        :param context:
+        :return:
+        """
+        user = User(context.message.author.id, context.guild.id, context)
+
+        # Currently only daily goals implemented
+        type = 'daily'
+
+        # Get the goal of this type for this user
+        goal = user.get_goal(type)
+        if goal:
+
+            now = int(time.time())
+            reset = goal['reset']
+            left = lib.secs_to_days(reset - now)
+            return await context.send(user.get_mention() + ', ' + lib.get_string('goal:timeleft', user.get_guild()).format(left, type))
+
+        else:
+            return await context.send(user.get_mention() + ', ' + lib.get_string('goal:nogoal', user.get_guild()).format(type))
+
+
 
     async def run_cancel(self, context):
 

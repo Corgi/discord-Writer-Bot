@@ -357,10 +357,11 @@ class User:
     def set_goal(self, type, value):
 
         user_goal = self.get_goal(type)
+        next_reset = self.calculate_user_reset_time()
+
         if user_goal:
-            return self.__db.update('user_goals', {'goal': value}, {'id': user_goal['id']})
+            return self.__db.update('user_goals', {'goal': value, 'reset': next_reset}, {'id': user_goal['id']})
         else:
-            next_reset = self.calculate_user_reset_time()
             return self.__db.insert('user_goals', {'type': type, 'goal': value, 'user': self._id, 'current': 0, 'completed': 0, 'reset': next_reset})
 
     def delete_goal(self, type):

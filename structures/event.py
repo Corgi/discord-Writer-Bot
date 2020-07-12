@@ -438,12 +438,24 @@ class Event:
 
         return embed
 
+    def _task_prechecks(self, bot):
+        """
+        Run pre-task checks before attempting to run whichever scheduled task it is
+        :param bot:
+        :return:
+        """
+        guild = bot.get_guild(int(self.guild))
+        return guild is not None
+
     async def task_start(self, bot):
         """
         Run the event starting task
         :param bot:
         :return:
         """
+        # Run pre-checks
+        if not self._task_prechecks(bot):
+            return True
 
         # If the event is already running, we don't need to do this.
         if self.is_running():
@@ -464,6 +476,10 @@ class Event:
         :param bot:
         :return:
         """
+        # Run pre-checks
+        if not self._task_prechecks(bot):
+            return True
+
         # If the event is already running, we don't need to do this.
         if self.is_ended():
             return True

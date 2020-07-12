@@ -510,12 +510,25 @@ class Sprint:
             channel = bot.get_channel(int(self.get_channel()))
             return await channel.send(message)
 
+    def _task_prechecks(self, bot):
+        """
+        Run pre-task checks before attempting to run whichever scheduled task it is
+        :param bot:
+        :return:
+        """
+        guild = bot.get_guild(int(self._guild))
+        return guild is not None
+
     async def task_start(self, bot) -> bool:
         """
         Scheduled task to start the sprint
         :param task:
         :return: bool
         """
+        # Run pre-checks
+        if not self._task_prechecks(bot):
+            return True
+
         now = int(time.time())
 
         # If the sprint has already finished, we don't need to do anything so we can return True and just have the task deleted.
@@ -536,6 +549,9 @@ class Sprint:
         :param task:
         :return:
         """
+        # Run pre-checks
+        if not self._task_prechecks(bot):
+            return True
 
         # If the task has already completed fully due to all the users submitting their word counts, we don't need to do this.
         if self.is_complete():
@@ -552,6 +568,9 @@ class Sprint:
         :param task:
         :return:
         """
+        # Run pre-checks
+        if not self._task_prechecks(bot):
+            return True
 
         # If the task has already completed fully due to all the users submitting their word counts, we don't need to do this.
         if self.is_complete():

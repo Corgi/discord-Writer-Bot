@@ -415,12 +415,6 @@ class Event:
         if footer:
             embed.set_footer(text=footer, icon_url=config.avatar)
 
-        # Add headers
-        headers = [
-            lib.get_string('user', self.get_guild()),
-            lib.get_string('wordcount', self.get_guild())
-        ]
-
         # Add users
         position = 1
 
@@ -429,15 +423,18 @@ class Event:
             # Get the user and pass in the bot, so we can get their guild nickname
             user_object = User(user['user'], self.get_guild(), context=self.__context, bot=self.__bot)
 
-            # Build the name and words variables to display in the list
-            name = str(position) + '. ' + user_object.get_name()
-            words = str(user['words'])
+            # Easiest way to check if the user is still a member of the guild, is to see if we can get their nickname
+            if user_object.is_guild_member():
 
-            # Embed this user result as a field
-            embed.add_field(name=name, value=words, inline=False)
+                # Build the name and words variables to display in the list
+                name = str(position) + '. ' + user_object.get_name()
+                words = str(user['words'])
 
-            # Increment position
-            position += 1
+                # Embed this user result as a field
+                embed.add_field(name=name, value=words, inline=False)
+
+                # Increment position
+                position += 1
 
         return embed
 

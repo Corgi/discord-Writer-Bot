@@ -162,6 +162,9 @@ class Help(commands.Cog, CommandWrapper):
             project_embed.add_field(name='`project update sword 6500`', value=lib.get_string('help:projectUpdateSub', user.get_guild()), inline=True)
             project_embed.add_field(name='`project complete sword`', value=lib.get_string('help:projectCompleteSub', user.get_guild()), inline=True)
             project_embed.add_field(name='`project restart sword`', value=lib.get_string('help:projectUncompleteSub', user.get_guild()), inline=True)
+            project_embed.add_field(name='`project view`', value=lib.get_string('help:projectListSub', user.get_guild()), inline=True)
+            project_embed.add_field(name='`project view sword`', value=lib.get_string('help:projectViewShortnameSub', user.get_guild()), inline=True)
+
             project_embed.set_footer(text=lib.get_string('help:projectFooter', user.get_guild()))
 
             return await context.send(embed=project_embed)

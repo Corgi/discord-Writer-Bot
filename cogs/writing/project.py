@@ -30,6 +30,7 @@ class Project(commands.Cog, CommandWrapper):
             `project rename sword sword2 The Sword in the Stone Two` - Renames the project with the shortname "sword" to - shortname:sword2, title:The Sword in the Stone Two (If you want to keep the same shortname but change the title, just put the same shortname, e.g. `project rename sword sword The Sword in the Stone Two`.
             `project update sword 65000` - Sets the word count for the project with the shortname "sword" to 65000.
             `project view` - Views a list of all your projects.
+            `project view sword` - Views the information about the project with the shortname "sword".
             `project complete sword` - Marks your project with the shortname "sword" as completed.
             `project restart sword` - Marks your project with the shortname "sword" as not completed.
         """
@@ -57,6 +58,8 @@ class Project(commands.Cog, CommandWrapper):
             return await self.run_rename(context, opts)
         elif cmd == 'update':
             return await self.run_update(context, opts)
+        elif cmd == 'view' and len(opts) > 0:
+            return await self.run_view(context, opts)
         elif cmd == 'view' or cmd == 'list':
             return await self.run_view(context)
         elif cmd == 'complete' or cmd == 'finish':
@@ -117,7 +120,7 @@ class Project(commands.Cog, CommandWrapper):
         else:
             return await context.send(user.get_mention() + ', ' + lib.get_string('project:recompleted', user.get_guild()))
 
-    async def run_view(self, context):
+    async def run_view(self, context, opts = None):
         """
         View a list of the user's projects
         :return:
@@ -128,6 +131,19 @@ class Project(commands.Cog, CommandWrapper):
         # If they have no projects, then we can't display them.
         if not projects:
             return await context.send(user.get_mention() + ', ' + lib.get_string('project:noprojects', user.get_guild()))
+
+        # Did they specify a shortname to look at?
+        if opts:
+
+            shortname = opts[0].lower()
+
+            # Make sure the project exists.
+            project = user.get_project(shortname)
+            if not project:
+                return await context.send(user.get_mention() + ', ' + lib.get_string('project:err:noexists', user.get_guild()).format(shortname))
+
+            # Re-create the array, but with just this one element in it.
+            projects = [project]
 
         message = ''
 

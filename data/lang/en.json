@@ -217,6 +217,8 @@
     "help:projectUpdateSub": "Sets the project with the shortname 'sword' word count to 6500 (6500 can be changed to your desired word count.)",
     "help:projectCompleteSub": "Marks the project with the shortname 'sword' as completed.",
     "help:projectUncompleteSub": "Marks the project the the shortname 'sword' as uncompleted.",
+    "help:projectListSub": "View a list of all your projects",
+    "help:projectViewShortnameSub": "View the word count of your project with the shortname 'sword'.",
     "help:projectFooter": "`project restart` can also be run as `project uncomplete`. `project complete` can also be run as `project finish`",
 
 

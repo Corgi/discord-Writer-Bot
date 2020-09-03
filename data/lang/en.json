@@ -105,7 +105,7 @@
     "challenge:alreadyactive": "You already have an active challenge. You will need to either complete or cancel it first.",
     "challenge:completed": "You have completed the challenge",
     "challenge:noactive": "You do not have an active challenge. Perhaps you should start one? `challenge`",
-    "challenge:givenup": "has given up on their challenge. Boo.",
+    "challenge:givenup": "wasn't able to finish their current challenge.",
     "challenge:current": "Your current challenge is",
     "challenge:tocomplete": "`challenge done` to complete the challenge.\n`challenge cancel` to cancel the challenge.",
     "challenge:plsrespond": "Please respond with either `yes` or `no` to your current challenge.",

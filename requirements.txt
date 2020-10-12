@@ -1,0 +1,4 @@
+discord==1.0.1
+numpy==1.19.2
+pymysql==0.10.1
+pytz==2020.1
